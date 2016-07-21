@@ -7,24 +7,24 @@ import petsc_io as io
 #import modred as mr
 
 
-class VecHandlePetsc(mr.VecHandle):
-    """Gets and puts array vector objects from/in text files."""
-    def __init__(self, vec_path, base_vec_handle=None, scale=None):
-        mr.VecHandle.__init__(self, base_vec_handle, scale)
-        self.vec_path = vec_path
+# class VecHandlePetsc(mr.VecHandle):
+#     """Gets and puts array vector objects from/in text files."""
+#     def __init__(self, vec_path, base_vec_handle=None, scale=None):
+#         mr.VecHandle.__init__(self, base_vec_handle, scale)
+#         self.vec_path = vec_path
 
-    def _get(self):
-        """Loads vector from path."""
-        return io.read_PETSc_vec(self.vec_path)
+#     def _get(self):
+#         """Loads vector from path."""
+#         return io.read_PETSc_vec(self.vec_path)
 
-    def _put(self, vec):
-        """Saves vector to path."""
-        io.write_PETSc_vec(vec, self.vec_path)
+#     def _put(self, vec):
+#         """Saves vector to path."""
+#         io.write_PETSc_vec(vec, self.vec_path)
 
-    def __eq__(self, other):
-        if type(other) != type(self):
-            return False
-        return self.vec_path == other.vec_path
+#     def __eq__(self, other):
+#         if type(other) != type(self):
+#             return False
+#         return self.vec_path == other.vec_path
 
 
 def constructSnapshotMatrix(path,pattern,nspinup,ntimestep,starttimestep = 1):
@@ -51,28 +51,28 @@ def computeSVD(Y):
     U, s, V = la.svd(Y,full_matrices=False)
     return U, s, V
 
-def plotSingular(s,eps):
-    ''' computes the index dependent on eps
-        and plot the singular values
-    '''
-    plt.pyplot.plot(s)
-    plt.pyplot.yscale('log')
-    #plt.pyplot.xscale('log')
-    plt.pyplot.xlabel('Sigma i')
-    plt.pyplot.ylabel('Value')
-    sigmaSum_r = 0
-    sigmaSum = sum(s)
-    for i,j in enumerate(s):
-        sigmaSum_r += j
-        if  sigmaSum_r/sigmaSum >= 1- eps*eps:
-            index = i
-            break
+# def plotSingular(s,eps):
+#     ''' computes the index dependent on eps
+#         and plot the singular values
+#     '''
+#     plt.pyplot.plot(s)
+#     plt.pyplot.yscale('log')
+#     #plt.pyplot.xscale('log')
+#     plt.pyplot.xlabel('Sigma i')
+#     plt.pyplot.ylabel('Value')
+#     sigmaSum_r = 0
+#     sigmaSum = sum(s)
+#     for i,j in enumerate(s):
+#         sigmaSum_r += j
+#         if  sigmaSum_r/sigmaSum >= 1- eps*eps:
+#             index = i
+#             break
 
-    plt.pyplot.axvline(ls= ':',x=index,color='r')
-    plt.pyplot.text(index, 1, 'eps='+str(eps))
-    plt.pyplot.title('Singularvalues of SVD')
-    plt.pyplot.show()
-    return index
+#     plt.pyplot.axvline(ls= ':',x=index,color='r')
+#     plt.pyplot.text(index, 1, 'eps='+str(eps))
+#     plt.pyplot.title('Singularvalues of SVD')
+#     plt.pyplot.show()
+#     return index
 
 def generate_prameter_samples(n,p):
         ''' generates Latin-Hypercubesamples with pyDOE and
