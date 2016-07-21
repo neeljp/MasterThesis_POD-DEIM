@@ -2,9 +2,9 @@ import numpy as np
 import numpy.linalg as la
 import petsc_io as io
 #import scipy as sp
-import matplotlib as plt
-import pyDOE
-import modred as mr
+#import matplotlib as plt
+#import pyDOE
+#import modred as mr
 
 
 class VecHandlePetsc(mr.VecHandle):
