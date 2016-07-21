@@ -41,6 +41,7 @@ def write_PETSc_vec(v,file):
 
 
 def write_PETSc_mat(A,file):
+<<<<<<< HEAD
 
     #does transpose the matrix samehow fixed with A.tocsr() because of row major/colum major
 
@@ -54,6 +55,19 @@ def write_PETSc_mat(A,file):
     rowidx,colidx   = A.nonzero()
     nrow,k          = numpy.histogram(rowidx,range(0,dims[0]+1))
 
+=======
+    import struct
+    import numpy
+    from scipy.sparse import csc_matrix
+
+    header      = numpy.array([1211216])
+    dims        = A.shape
+    nx          = numpy.array(dims[0])
+    ny          = numpy.array(dims[1])
+    nnz         = numpy.array([A.nnz])
+    j,colidx    = A.nonzero()
+    nrow,k      = numpy.histogram(j,range(0,dims[0]+1))
+>>>>>>> 8e942201d16d7b74c2228a0549727df827f2d601
 
     # print('header')
     # print(header)
@@ -81,7 +95,11 @@ def write_PETSc_mat(A,file):
 
 def read_PETSc_mat(file):
     import numpy
+<<<<<<< HEAD
     from scipy.sparse import csr_matrix
+=======
+    from scipy.sparse import csc_matrix
+>>>>>>> 8e942201d16d7b74c2228a0549727df827f2d601
 
     # open file
     try:
@@ -121,7 +139,11 @@ def read_PETSc_mat(file):
             spdata[offset:offset+nrow[i],2]= val[offset:offset+nrow[i]]
             offset = offset+nrow[i]
     #print(spdata[:,0])
+<<<<<<< HEAD
     return csr_matrix((spdata[:,2], (spdata[:,0],spdata[:,1])), shape=(nx, ny),dtype=numpy.float_)
+=======
+    return csc_matrix((spdata[:,2], (spdata[:,0],spdata[:,1])), shape=(nx, ny))
+>>>>>>> 8e942201d16d7b74c2228a0549727df827f2d601
 
     # create full matrix
     # lsmfull = numpy.zeros(shape=(nx[0], ny[0]), dtype=int)
@@ -141,7 +163,11 @@ def read_data(tracer):
     # arrays
 
     # v1d, z, dz, lsm (land sea mask)
+<<<<<<< HEAD
     v1d = read_PETSc_vec("simulation/" + tracer)
+=======
+    v1d = read_PETSc_vec("work/" + tracer)
+>>>>>>> 8e942201d16d7b74c2228a0549727df827f2d601
     z   = read_PETSc_vec("data/TMM/2.8/Forcing/DomainCondition/z.petsc")
     dz  = read_PETSc_vec("data/TMM/2.8/Forcing/DomainCondition/dz.petsc")
     lsm = read_PETSc_mat("data/TMM/2.8/Geometry/landSeaMask.petsc")
@@ -249,4 +275,8 @@ def create_figure_surface(figid, aspect, xx, yy, cmin, cmax, levels, slices, v3d
 
     # write to file
     #plt.savefig("solution-surface", bbox_inches="tight")
+<<<<<<< HEAD
     plt.show()
+=======
+    plt.show()
+>>>>>>> 8e942201d16d7b74c2228a0549727df827f2d601
