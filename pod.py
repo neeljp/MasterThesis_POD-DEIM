@@ -12,15 +12,6 @@ np.set_printoptions(threshold=np.nan)
 
 
 def constructSnapshotMatrix(path,ndistribution,nspinup,ntimestep,starttimestep = 1):
-=======
-import pynolh
-import argparse
-import math
-import sys
-
-
-def constructSnapshotMatrix(path,distribution,startdistribution,ndistribution,nspinup,ntimestep,starttimestep = 0):
->>>>>>> 8e942201d16d7b74c2228a0549727df827f2d601
     ''' returns an matix of Snapshots,
     Params: ndistribution:number of diffrent initial distributions
             nspinup: number of spinups
@@ -29,7 +20,7 @@ def constructSnapshotMatrix(path,distribution,startdistribution,ndistribution,ns
             distribution: string code of distributions
     '''
     ny = 52749
-<<<<<<< HEAD
+
     Y_N = np.empty([ny,np.int_(ndistribution * nspinup *(ntimestep-starttimestep+1))],dtype='float_')
     #Y_DOP = np.empty([ny,np.int_(ndistribution * nspinup *(ntimestep-starttimestep))],dtype='float_')
 
@@ -48,24 +39,7 @@ def constructSnapshotMatrix(path,distribution,startdistribution,ndistribution,ns
 
     print('Data loaded')
     return Y_N#,Y_DOP
-=======
-    Y = np.empty([ny,((ndistribution-startdistribution+1)/2) * nspinup *(ntimestep-1-starttimestep)],dtype='float_')
 
-    counter = 0
-    #start distribution
-    for j in range(startdistribution,ndistribution,2):
-        #spinup
-        for x in range(0,nspinup):
-            #time step
-             for i in range(starttimestep+1,ntimestep):
-
-                 Y[:,counter] = io.read_PETSc_vec(path+'/sp'+str(x).zfill(4)+'ts' + str(i*240-1).zfill(4) + 'N_'+str(j).zfill(2)+'_'+distribution+'.petsc')
-                 #print(path + '/sp' + str(x).zfill(4) +'ts' + str(i*240-1).zfill(4) + 'N_' + str(j).zfill(2)+ '_'+pattern+ '.petsc')
-                 counter+=1
-
-    print('Data loaded:'+path+'/sp000$dts000$dN_'+str(startdistribution).zfill(2)+'-'+str(ndistribution).zfill(2)+'_'+distribution+'.petsc')
-    return Y
->>>>>>> 8e942201d16d7b74c2228a0549727df827f2d601
 
 def computeSVD(Y):
     U, s, V = la.svd(Y,full_matrices=False)
@@ -91,16 +65,11 @@ def plotSingular(s,eps):
     plt.pyplot.axvline(ls= ':',x=index,color='r')
     plt.pyplot.text(index, 1, 'eps='+str(eps))
     plt.pyplot.title('Singularvalues of SVD')
-<<<<<<< HEAD
     plt.pyplot.show()
     return index
 
-def reducedModel_pod(initVec,reducedBasis,distribution,spinups):
-=======
-    return index
-
 def reducedModel(initVec,reducedBasis,distribution,spinups):
->>>>>>> 8e942201d16d7b74c2228a0549727df827f2d601
+
         ''' computes solution of the redued modell
                 Params: initVec: path to start vector
                         reducedBasis: path to the reduced basis
@@ -132,11 +101,7 @@ def reducedModel(initVec,reducedBasis,distribution,spinups):
             e = np.linalg.norm(n-V.dot(c))
             print('spingup:', l, 'error:',e)
             #one year
-<<<<<<< HEAD
             for m in range(12):
-=======
-            for m in range(1,13):
->>>>>>> 8e942201d16d7b74c2228a0549727df827f2d601
                 #one month
                 for i in range(240):
                     #one timestep
@@ -145,7 +110,6 @@ def reducedModel(initVec,reducedBasis,distribution,spinups):
 
                 #save solution vector at the end of one month
                 vstep = V.dot(c)
-<<<<<<< HEAD
                 io.write_PETSc_vec(vstep, reducedBasis + '/sp'+str(l).zfill(4)+'ts'+str(i+m*240).zfill(4)+'N_'+distribution+'.petsc')
 
 
@@ -388,14 +352,9 @@ def reducedModelDeim_test(nspinup,ntimestep,J):
                 print("spin: ", spin,"step: ", s,"t:", t,"norm: ", str(s).zfill(4) ,np.linalg.norm(y[:offset]-v1), np.linalg.norm(y[offset:]-v2), np.min(y[:offset]-v1),np.min(y[offset:]-v2))
                     #print(y_long[:52749]-v1,y_long[52749:]-v2)
                 y = Aiint.dot((Aeint.dot(y) + q_com))
-
-def plotErrorNorm(ndistribution,nspinup,nspinup_reduced,timesteps):
-=======
                 io.write_PETSc_vec(vstep, reducedBasis + '/sp'+str(l).zfill(4)+'ts'+str(i+(m-1)*240).zfill(4)+'N_'+distribution+'.petsc')
 
-
-def plotErrorNorm(distribution,reducedBasis,ndistribution,nspinup,nspinup_reduced,timesteps):
->>>>>>> 8e942201d16d7b74c2228a0549727df827f2d601
+def plotErrorNorm(ndistribution,nspinup,nspinup_reduced,timesteps):       
     ''' loads trajecotries from the highdim. and the reduced system, computes error norm and plots it.
         Params: distribution: string code of distribution
                 reducedBasis: string code of the reduced basis
@@ -404,7 +363,6 @@ def plotErrorNorm(distribution,reducedBasis,ndistribution,nspinup,nspinup_reduce
                 nspinup_reduced: number of spinups of the reduced data
                 timesteps: number of timesteps
     '''
-<<<<<<< HEAD
     Y_reduced = constructSnapshotMatrix('simulation/reduced/N-Model/',ndistribution,nspinup_reduced,12,timesteps)
     Y_hd = constructSnapshotMatrix('simulation/POD/N-Model/',ndistribution,nspinup,12,timesteps)
     n = np.ones(Y_reduced.shape[0]) * 2.17
@@ -433,7 +391,7 @@ def plotErrorNorm(distribution,reducedBasis,ndistribution,nspinup,nspinup_reduce
     plt.pyplot.xlabel('Model Year')
     plt.pyplot.ylabel(r"\textbf{norm}  $\frac{mmol P}{m^3} $")
     plt.pyplot.show()
-=======
+
     Y_reduced = constructSnapshotMatrix('work/Reduced/'+reducedBasis,distribution,ndistribution,ndistribution+1,nspinup_reduced,13,timesteps)
     Y_hd = constructSnapshotMatrix('work/UD',distribution,ndistribution,ndistribution+1,nspinup,13,timesteps)
     n = np.ones(Y_reduced.shape[0]) * 2.17
@@ -459,7 +417,7 @@ def plotErrorNorm(distribution,reducedBasis,ndistribution,nspinup,nspinup_reduce
     #plt.pyplot.xscale('log')
     plt.pyplot.xlabel('Model Month')
     plt.pyplot.ylabel(r"\textbf{norm}  $\frac{mmol P}{m^3} $")
->>>>>>> 8e942201d16d7b74c2228a0549727df827f2d601
+
 
 
 def plotVecOnWorldmap(path,vec=None):
@@ -485,17 +443,14 @@ def plotVecOnWorldmap(path,vec=None):
 
     io.create_figure_surface(4, aspect, xx, yy, cmin, cmax, levels, slices, v3d)
 
-<<<<<<< HEAD
+
 def createReducedMatrices(V,P):
-=======
-def createReducedMatrices(V):
->>>>>>> 8e942201d16d7b74c2228a0549727df827f2d601
     ''' creates 12 matrices for the reduced system with V as basis and saves them
     '''
     for i in range(0,12):
         Ai = io.read_PETSc_mat('data/TMM/2.8/Transport/Matrix5_4/1dt/Ai_'+str(i).zfill(2)+'.petsc')
         Ae = io.read_PETSc_mat('data/TMM/2.8/Transport/Matrix5_4/1dt/Ae_'+str(i).zfill(2)+'.petsc')
-<<<<<<< HEAD
+
         #Ai = sp.sparse.block_diag((Ai,Ai))
         #Ae = sp.sparse.block_diag((Ae,Ae))
         Ar = V.T.dot(Ai.dot(Ae.dot(V)))
@@ -504,12 +459,6 @@ def createReducedMatrices(V):
         np.save('reduced_P' +str(i).zfill(2), Pr)
 
     #np.save('Basis_matrix',V)
-=======
-        Ar = V.T.dot(Ai.dot(Ae.dot(V)))
-        np.save('reduced_A' +str(i).zfill(2), Ar)
-
-    np.save('Basis_matrix',V)
->>>>>>> 8e942201d16d7b74c2228a0549727df827f2d601
 
 def createReducedMatricesExp(V):
     ''' TEST creates 12 explicid matrices for the reduced system with V as basis
@@ -530,7 +479,6 @@ def linearinterpolation(nstep,ndata):
     ndata: Number of matrices
     """
     import numpy
-<<<<<<< HEAD
     dt = 0.0003472222222222
     t = numpy.zeros(nstep,dtype=numpy.float_)
     for i in range(nstep):
@@ -633,17 +581,6 @@ def generateIndicesForNonlinearFunction():
             PJ[i+52749,0] = j-1;
             PJ[i+52749,1] = i-J[j-1]
     return J,PJ
-=======
-    tstep   = 1/nstep
-    t       = numpy.linspace(0,1,nstep)
-
-    w       = t * ndata+0.5
-    beta    = numpy.mod(w, 1)
-    alpha   = 1-beta
-    jalpha  = numpy.mod(numpy.floor(w)+ndata-1,ndata).astype(int)
-    jbeta   = numpy.mod(numpy.floor(w),ndata).astype(int)
-
-    return alpha,beta,jalpha,jbeta
     
 def nolh(conf, remove=None):
     """Constructs a Nearly Orthogonal Latin Hypercube (NOLH) of order *m* from
@@ -816,4 +753,3 @@ def rank_restr(nvars=4, smp=100, noCorrRestr=False, Corrmat=None):
         Final=S.transpose()*inv(Q).transpose()*P.transpose()
         x = [stats.stats.rankdata(Final.transpose()[i,]) for i in range(nvars)]
     return x
->>>>>>> 8e942201d16d7b74c2228a0549727df827f2d601
