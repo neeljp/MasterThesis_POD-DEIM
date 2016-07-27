@@ -78,6 +78,40 @@ def write_PETSc_mat(A,file):
     f.close()
     return 0
 
+def write_PETSc_mat_dense(A,file):
+
+    #does transpose the matrix samehow fixed with A.tocsr() because of row major/colum major
+
+    import struct
+    import numpy
+    header          = numpy.array([1211216])
+    dims            = A.shape
+    nx              = numpy.array(dims[0])
+    ny              = numpy.array(dims[1])
+    matrixFormat    = numpy.array([-1])
+
+
+    # print('header')
+    # print(header)
+    # print("dims")
+    # print(dims)
+    # print("nnz")
+    # print (nnz)
+    # print ("nrow")
+    # print (nrow,nrow.shape)
+    # print ("colidx")
+    # print (colidx,colidx.shape)
+    # print('val')
+    # print(A.data)
+    f = open(file, "wb")
+    header.astype('>i4').tofile(f)
+    nx.astype('>i4').tofile(f)
+    ny.astype('>i4').tofile(f)
+    matrixFormat.astype('>i4').tofile(f)
+    A.astype('>f8').tofile(f)
+    f.close()
+    return 0
+
 
 def read_PETSc_mat(file):
     import numpy
