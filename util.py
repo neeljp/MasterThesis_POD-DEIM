@@ -1,10 +1,10 @@
 import numpy as np
 import numpy.linalg as la
 import petsc_io as io
-#import scipy as sp
-#import matplotlib as plt
-#import pyDOE
-#import modred as mr
+# import scipy as sp
+# import matplotlib as plt
+# import pyDOE
+# import modred as mr
 
 
 # class VecHandlePetsc(mr.VecHandle):
@@ -46,6 +46,20 @@ def constructSnapshotMatrix(path,pattern,nspinup,ntimestep,starttimestep = 1):
             Y_N[:,counter] = io.read_PETSc_vec(path+pattern % (s,240*i-1))
             counter+=1
     return Y_N
+
+def constructMatrix(path,outpath,pattern,nstep):
+    ''' returns an matix,
+    Params:
+            '''
+    ny = 52749
+    Y  = np.empty([ny,np.int_(nstep)],dtype='float_')
+    #Y_DOP = np.empty([ny,np.int_(ndistribution * nspinup *(ntimestep-starttimestep))],dtype='float_')
+
+    counter = 0
+    for i in range(nstep):
+        Y[:,i] = io.read_PETSc_vec(path+pattern % i)
+    
+    np.save(outpath,y)
 
 def computeSVD(Y):
     U, s, V = la.svd(Y,full_matrices=False)
@@ -155,7 +169,7 @@ def createReducedMatrices(U_POD,U_DEIM,PT,p,path):
     for i in range(0,12):
         Ai = io.read_PETSc_mat('data/TMM/2.8/Transport/Matrix5_4/1dt/Ai_'+str(i).zfill(2)+'.petsc')
         Ae = io.read_PETSc_mat('data/TMM/2.8/Transport/Matrix5_4/1dt/Ae_'+str(i).zfill(2)+'.petsc')
-        #Ai = sp.sparse.block_diag((Ai,Ai))
+        #Ai = sp.sparse.block_diag((Ai,Ai))y
         #Ae = sp.sparse.block_diag((Ae,Ae))
         Ar = U_POD.T.dot(Ai.dot(Ae.dot(U_POD)))
         Pr = U_POD.T.dot(Ai.dot(P))
