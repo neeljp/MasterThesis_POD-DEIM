@@ -10,7 +10,7 @@ int main(int argc,char **argv)
 {
   Mat            A;               /* operator matrix */
   SVD            svd;             /* singular value problem solver context */
-  Vec            u,v;             /* left and right singular vectors */
+  Vec            u,v,singularvalues;             /* left and right singular vectors */
   SVDType        type;
   PetscReal      tol,sigma,error;
   PetscInt       nsv,maxit,its,nconv,i;
@@ -39,7 +39,7 @@ int main(int argc,char **argv)
   //ierr = PetscViewerDestroy(&viewer);CHKERRQ(ierr);
 
 
-  ierr = MatCreateDense(PETSC_COMM_WORLD,PETSC_DECIDE,PETSC_DECIDE,52749,6000,NULL,&A);CHKERRQ(ierr);
+  ierr = MatCreateDense(PETSC_COMM_WORLD,PETSC_DECIDE,PETSC_DECIDE,52749,200,NULL,&A);CHKERRQ(ierr);
   ierr = MatSetType(A,"mpidense");CHKERRQ(ierr);
   ierr = PetscViewerBinaryOpen(PETSC_COMM_WORLD,filename,FILE_MODE_READ,&viewer);CHKERRQ(ierr);
   ierr = MatLoad(A,viewer);CHKERRQ(ierr);
@@ -100,6 +100,9 @@ int main(int argc,char **argv)
   ierr = PetscPrintf(PETSC_COMM_WORLD," Number of converged approximate singular triplets: %D\n\n",nconv);CHKERRQ(ierr);
 
   if (nconv>0) {
+    ierr = VecCreate(PETSC_COMM_WORLD,&singularvalues);CHKERRQ(ierr);
+    ierr = VecSetSizes(singularvalues,PETSC_DECIDE,nconv);CHKERRQ(ierr);
+    ierr = VecSetFromOptions(singularvalues);CHKERRQ(ierr);
     for (i=0;i<nconv;i++) {
       /*
          Get converged singular triplets: i-th singular value is stored in sigma
@@ -116,9 +119,15 @@ int main(int argc,char **argv)
       ierr = VecView(v,viewer);CHKERRQ(ierr);
       ierr = PetscViewerDestroy(&viewer);CHKERRQ(ierr);
       
+      ierr = VecSetValues(singularvalues,1,&i,&sigma,INSERT_VALUES);CHKERRQ(ierr);
       ierr = SVDComputeError(svd,i,SVD_ERROR_RELATIVE,&error);CHKERRQ(ierr);
       ierr = PetscPrintf(PETSC_COMM_WORLD,"%4d : sigma: %12.16f      error: %12g\n",i,sigma,error);CHKERRQ(ierr);
+
     }
+    ierr = PetscViewerBinaryOpen(PETSC_COMM_WORLD,"sigma.petsc",FILE_MODE_WRITE,&viewer);CHKERRQ(ierr);
+    ierr = VecView(singularvalues,viewer);CHKERRQ(ierr);
+    ierr = PetscViewerDestroy(&viewer);CHKERRQ(ierr);
+
   }
   }
   ierr = SVDDestroy(&svd);CHKERRQ(ierr);
