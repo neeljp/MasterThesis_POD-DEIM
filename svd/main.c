@@ -1,7 +1,6 @@
-static char help[] = "Solves a singular value problem with the matrix loaded from a file.\n"
-  "This example works for both real and complex numbers.\n\n"
+static char help[] = "Solves a singular value problem with the dense matrix loaded from a file.\n"
   "The command line options are:\n"
-  "  -file <filename>, where <filename> = matrix file in PETSc binary form.\n\n";
+  "  -file <filename>, where <filename> = matrix file in PETSc dense binary form.\n\n";
 
 #include <slepcsvd.h>
 
@@ -20,7 +19,7 @@ int main(int argc,char **argv)
   PetscBool      flg,terse;
   PetscErrorCode ierr;
 
-  PetscInitialize(&argc,&argv,(char*)0,help);
+  //PetscInitialize(&argc,&argv,(char*)0,help);
   SlepcInitialize(&argc,&argv,(char*)0,help);
 
   /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -30,35 +29,22 @@ int main(int argc,char **argv)
   ierr = PetscPrintf(PETSC_COMM_WORLD,"\nSingular value problem stored in file.\n\n");CHKERRQ(ierr);
   ierr = PetscOptionsGetString(NULL,NULL,"-file",filename,PETSC_MAX_PATH_LEN,&flg);CHKERRQ(ierr);
   if (!flg) SETERRQ(PETSC_COMM_WORLD,1,"Must indicate a file name with the -file option");
-
-#if defined(PETSC_USE_COMPLEX)
-  ierr = PetscPrintf(PETSC_COMM_WORLD," Reading COMPLEX matrix from a binary file...\n");CHKERRQ(ierr);
-#else
-  ierr = PetscPrintf(PETSC_COMM_WORLD," Reading REAL matrix from a binary file...\n");CHKERRQ(ierr);
-#endif
+  ierr = PetscPrintf(PETSC_COMM_WORLD," Reading dense matrix from a binary file...\n");CHKERRQ(ierr);
   //ierr = PetscViewerBinaryOpen(PETSC_COMM_WORLD,filename,FILE_MODE_WRITE,&viewer);CHKERRQ(ierr);
   //ierr = MatCreate(PETSC_COMM_WORLD,&A);CHKERRQ(ierr);
-  ierr = MatCreateDense(PETSC_COMM_WORLD,PETSC_DECIDE,PETSC_DECIDE,52749,6000,NULL,&A);CHKERRQ(ierr);
   //MatView(A,viewer);
-  ierr = MatSetType(A,"mpidense");CHKERRQ(ierr);
   //ierr = MatSetSizes(A,PETSC_DECIDE,PETSC_DECIDE,52749,300);CHKERRQ(ierr);
   //ierr = MatSetFromOptions(A);CHKERRQ(ierr);
   //ierr = MatLoad(A,viewer);CHKERRQ(ierr);
   //ierr = PetscViewerDestroy(&viewer);CHKERRQ(ierr);
 
+
+  ierr = MatCreateDense(PETSC_COMM_WORLD,PETSC_DECIDE,PETSC_DECIDE,52749,6000,NULL,&A);CHKERRQ(ierr);
+  ierr = MatSetType(A,"mpidense");CHKERRQ(ierr);
   ierr = PetscViewerBinaryOpen(PETSC_COMM_WORLD,filename,FILE_MODE_READ,&viewer);CHKERRQ(ierr);
   ierr = MatLoad(A,viewer);CHKERRQ(ierr);
   ierr = PetscViewerDestroy(&viewer);CHKERRQ(ierr);
   ierr = MatCreateVecs(A,&v,&u);CHKERRQ(ierr);
-  // MatGetType(A,&mattype);
-  // ierr = PetscPrintf(PETSC_COMM_WORLD," mattype %s",mattype);CHKERRQ(ierr);
-
-  // MatGetRow(A,3,&ncols,&cols,&vals);
-  // for(int i =0 ; i< 3;i++)
-  //   {
-  //       printf("firts row of A entry %d: %.20f\n", i,vals[i]);
-  //   }
-
 
   /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
                 Create the singular value solver and set various options
@@ -119,12 +105,17 @@ int main(int argc,char **argv)
          Get converged singular triplets: i-th singular value is stored in sigma
       */
       ierr = SVDGetSingularTriplet(svd,i,&sigma,u,v);CHKERRQ(ierr);
-      sprintf(filepattern,"U%4d.petsc", i);
+      
+      sprintf(filepattern,"U%00004d.petsc", i);
       ierr = PetscViewerBinaryOpen(PETSC_COMM_WORLD,filepattern,FILE_MODE_WRITE,&viewer);CHKERRQ(ierr);
-      VecView(u,viewer);
-      sprintf(filepattern,"V%4d.petsc", i);
+      ierr = VecView(u,viewer);CHKERRQ(ierr);
+      ierr = PetscViewerDestroy(&viewer);CHKERRQ(ierr);
+      
+      sprintf(filepattern,"V%00004d.petsc", i);
       ierr = PetscViewerBinaryOpen(PETSC_COMM_WORLD,filepattern,FILE_MODE_WRITE,&viewer);CHKERRQ(ierr);
-      VecView(v,viewer);
+      ierr = VecView(v,viewer);CHKERRQ(ierr);
+      ierr = PetscViewerDestroy(&viewer);CHKERRQ(ierr);
+      
       ierr = SVDComputeError(svd,i,SVD_ERROR_RELATIVE,&error);CHKERRQ(ierr);
       ierr = PetscPrintf(PETSC_COMM_WORLD,"%4d : sigma: %12.16f      error: %12g\n",i,sigma,error);CHKERRQ(ierr);
     }
@@ -132,6 +123,8 @@ int main(int argc,char **argv)
   }
   ierr = SVDDestroy(&svd);CHKERRQ(ierr);
   ierr = MatDestroy(&A);CHKERRQ(ierr);
+  ierr = VecDestroy(&u);CHKERRQ(ierr);
+  ierr = VecDestroy(&v);CHKERRQ(ierr);
   ierr = SlepcFinalize();
   return ierr;
 }
