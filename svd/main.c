@@ -14,7 +14,7 @@ int main(int argc,char **argv)
   SVDType        type;
   PetscReal      tol,sigma,error;
   PetscInt       nsv,maxit,its,nconv,i,m;
-  char           filename[PETSC_MAX_PATH_LEN],filepattern[PETSC_MAX_PATH_LEN];
+  char           filename[PETSC_MAX_PATH_LEN],filepattern[PETSC_MAX_PATH_LEN],path[PETSC_MAX_PATH_LEN];
   PetscViewer    viewer;
   PetscBool      flg,terse;
   PetscErrorCode ierr;
@@ -28,6 +28,7 @@ int main(int argc,char **argv)
 
   ierr = PetscPrintf(PETSC_COMM_WORLD,"\nSingular value problem stored in file.\n\n");CHKERRQ(ierr);
   ierr = PetscOptionsGetString(NULL,NULL,"-file",filename,PETSC_MAX_PATH_LEN,&flg);CHKERRQ(ierr);
+  ierr = PetscOptionsGetString(NULL,NULL,"-path",path,PETSC_MAX_PATH_LEN,&flg);CHKERRQ(ierr);
   ierr = PetscOptionsGetInt(NULL,NULL,"-m",&m,&flg);CHKERRQ(ierr);
   if (!flg) SETERRQ(PETSC_COMM_WORLD,1,"Must indicate a file name with the -file option and -m matsize option");
   ierr = PetscPrintf(PETSC_COMM_WORLD,"Reading dense matrix from a binary file...\n");CHKERRQ(ierr);
@@ -112,7 +113,7 @@ int main(int argc,char **argv)
       */
       ierr = SVDGetSingularTriplet(svd,i,&sigma,u,v);CHKERRQ(ierr);
       
-      sprintf(filepattern,"U%00004d.petsc", i);
+      sprintf(filepattern,"%sU%00004d.petsc", path, i);
       ierr = PetscViewerBinaryOpen(PETSC_COMM_WORLD,filepattern,FILE_MODE_WRITE,&viewer);CHKERRQ(ierr);
       ierr = VecView(u,viewer);CHKERRQ(ierr);
       ierr = PetscViewerDestroy(&viewer);CHKERRQ(ierr);
@@ -129,7 +130,8 @@ int main(int argc,char **argv)
     }
     ierr = VecAssemblyBegin(singularvalues);CHKERRQ(ierr);
     ierr = VecAssemblyEnd(singularvalues);CHKERRQ(ierr);
-    ierr = PetscViewerBinaryOpen(PETSC_COMM_WORLD,"sigma.petsc",FILE_MODE_WRITE,&viewer);CHKERRQ(ierr);
+    sprintf(filepattern,"%ssigma.petsc", path);
+    ierr = PetscViewerBinaryOpen(PETSC_COMM_WORLD,filepattern,FILE_MODE_WRITE,&viewer);CHKERRQ(ierr);
     ierr = VecView(singularvalues,viewer);CHKERRQ(ierr);
     ierr = PetscViewerDestroy(&viewer);CHKERRQ(ierr);
 
