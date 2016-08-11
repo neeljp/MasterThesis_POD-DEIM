@@ -13,7 +13,7 @@ int main(int argc,char **argv)
   Vec            u,v,singularvalues;             /* left and right singular vectors */
   SVDType        type;
   PetscReal      tol,sigma,error;
-  PetscInt       nsv,maxit,its,nconv,i;
+  PetscInt       nsv,maxit,its,nconv,i,m;
   char           filename[PETSC_MAX_PATH_LEN],filepattern[PETSC_MAX_PATH_LEN];
   PetscViewer    viewer;
   PetscBool      flg,terse;
@@ -28,8 +28,9 @@ int main(int argc,char **argv)
 
   ierr = PetscPrintf(PETSC_COMM_WORLD,"\nSingular value problem stored in file.\n\n");CHKERRQ(ierr);
   ierr = PetscOptionsGetString(NULL,NULL,"-file",filename,PETSC_MAX_PATH_LEN,&flg);CHKERRQ(ierr);
-  if (!flg) SETERRQ(PETSC_COMM_WORLD,1,"Must indicate a file name with the -file option");
-  ierr = PetscPrintf(PETSC_COMM_WORLD," Reading dense matrix from a binary file...\n");CHKERRQ(ierr);
+  ierr = PetscOptionsGetInt(NULL,NULL,"-m",&m,&flg);CHKERRQ(ierr);
+  if (!flg) SETERRQ(PETSC_COMM_WORLD,1,"Must indicate a file name with the -file option and -m matsize option");
+  ierr = PetscPrintf(PETSC_COMM_WORLD,"Reading dense matrix from a binary file...\n");CHKERRQ(ierr);
   //ierr = PetscViewerBinaryOpen(PETSC_COMM_WORLD,filename,FILE_MODE_WRITE,&viewer);CHKERRQ(ierr);
   //ierr = MatCreate(PETSC_COMM_WORLD,&A);CHKERRQ(ierr);
   //MatView(A,viewer);
@@ -39,12 +40,14 @@ int main(int argc,char **argv)
   //ierr = PetscViewerDestroy(&viewer);CHKERRQ(ierr);
 
 
-  ierr = MatCreateDense(PETSC_COMM_WORLD,PETSC_DECIDE,PETSC_DECIDE,52749,200,NULL,&A);CHKERRQ(ierr);
+  ierr = MatCreateDense(PETSC_COMM_WORLD,PETSC_DECIDE,PETSC_DECIDE,52749,m,NULL,&A);CHKERRQ(ierr);
   ierr = MatSetType(A,"mpidense");CHKERRQ(ierr);
   ierr = PetscViewerBinaryOpen(PETSC_COMM_WORLD,filename,FILE_MODE_READ,&viewer);CHKERRQ(ierr);
   ierr = MatLoad(A,viewer);CHKERRQ(ierr);
   ierr = PetscViewerDestroy(&viewer);CHKERRQ(ierr);
   ierr = MatCreateVecs(A,&v,&u);CHKERRQ(ierr);
+
+  ierr = PetscPrintf(PETSC_COMM_WORLD,"matrix loaded...\n");CHKERRQ(ierr);
 
   /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
                 Create the singular value solver and set various options
@@ -114,16 +117,18 @@ int main(int argc,char **argv)
       ierr = VecView(u,viewer);CHKERRQ(ierr);
       ierr = PetscViewerDestroy(&viewer);CHKERRQ(ierr);
       
-      sprintf(filepattern,"V%00004d.petsc", i);
-      ierr = PetscViewerBinaryOpen(PETSC_COMM_WORLD,filepattern,FILE_MODE_WRITE,&viewer);CHKERRQ(ierr);
-      ierr = VecView(v,viewer);CHKERRQ(ierr);
-      ierr = PetscViewerDestroy(&viewer);CHKERRQ(ierr);
+      // sprintf(filepattern,"V%00004d.petsc", i);
+      // ierr = PetscViewerBinaryOpen(PETSC_COMM_WORLD,filepattern,FILE_MODE_WRITE,&viewer);CHKERRQ(ierr);
+      // ierr = VecView(v,viewer);CHKERRQ(ierr);
+      // ierr = PetscViewerDestroy(&viewer);CHKERRQ(ierr);
       
       ierr = VecSetValues(singularvalues,1,&i,&sigma,INSERT_VALUES);CHKERRQ(ierr);
       ierr = SVDComputeError(svd,i,SVD_ERROR_RELATIVE,&error);CHKERRQ(ierr);
       ierr = PetscPrintf(PETSC_COMM_WORLD,"%4d : sigma: %12.16f      error: %12g\n",i,sigma,error);CHKERRQ(ierr);
 
     }
+    ierr = VecAssemblyBegin(singularvalues);CHKERRQ(ierr);
+    ierr = VecAssemblyEnd(singularvalues);CHKERRQ(ierr);
     ierr = PetscViewerBinaryOpen(PETSC_COMM_WORLD,"sigma.petsc",FILE_MODE_WRITE,&viewer);CHKERRQ(ierr);
     ierr = VecView(singularvalues,viewer);CHKERRQ(ierr);
     ierr = PetscViewerDestroy(&viewer);CHKERRQ(ierr);
@@ -134,6 +139,7 @@ int main(int argc,char **argv)
   ierr = MatDestroy(&A);CHKERRQ(ierr);
   ierr = VecDestroy(&u);CHKERRQ(ierr);
   ierr = VecDestroy(&v);CHKERRQ(ierr);
+  ierr = VecDestroy(&singularvalues);CHKERRQ(ierr);
   ierr = SlepcFinalize();
   return ierr;
 }
