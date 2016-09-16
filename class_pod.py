@@ -1,9 +1,9 @@
 import numpy as np
 import numpy.linalg as la
 import petsc_io as io
-import scipy as sp
 import model
 import util as util
+import time
 #np.set_printoptions(threshold=np.nan)
 np.set_printoptions(precision=20)
 
@@ -68,6 +68,8 @@ class ReducedModel:
         def __TimeStep(self,step):
                 self.t = np.fmod(0 + step*self.dt, 1.0);
                 counter = 0
+                bgcTime = time.time()
+                #bgcStepTime = 0
                 for i,l in self.PJ[self.DEIM_Indices]:
                         index = np.arange(self.J[i],self.J[i+1])
                         #transpose for input in biomodel
@@ -75,26 +77,49 @@ class ReducedModel:
                         self.bc[0] = self.lat[i]
                         self.bc[1] = self.interpolation_a[step]*self.fice[i,self.interpolation_j[step]] + self.interpolation_b[step]*self.fice[i,self.interpolation_k[step]]
                         #print("bio: ", y, bc ,dc[J[i]:J[i+1],:],u)
+                        #bgcStepTime_tmp = time.time()
                         self.q[counter] = model.metos3dbgc(self.dt,self.t,y,self.u,self.bc,self.dc[self.J[i]:self.J[i+1],:])[l]
+                        #bgcStepTime += time.time() - bgcStepTime_tmp
                         counter += 1
-
+                #bgcTime = time.time()- bgcTime
+                #interpolationTime = time.time() 
                 P_interpolation = self.interpolation_a[step]*self.P[self.interpolation_j[step]] + self.interpolation_b[step]*self.P[self.interpolation_k[step]]
-                q_red = np.dot(P_interpolation,self.q)
-                
                 A_interpolation = self.interpolation_a[step]*self.A[self.interpolation_j[step]] + self.interpolation_b[step]*self.A[self.interpolation_k[step]]
+                #interpolationTime = time.time() - interpolationTime
+                #multTime = time.time()
+                q_red = np.dot(P_interpolation,self.q)
                 self.y_red = A_interpolation.dot(self.y_red) + q_red 
-
+                #multTime = time.time()- multTime
+                #return bgcTime,multTime,interpolationTime
 
         def simulate(self):
+                starttime = time.time()
+                timings = np.zeros(self.nspinup)
+                bgcTime = np.zeros(self.ntimestep)
+                #bgcStepTime = np.zeros(self.ntimestep)
+                multTime = np.zeros(self.ntimestep)
+                interpolationTime = np.zeros(self.ntimestep)
+
                 for spin in range(self.nspinup):
                         for step in range(self.ntimestep):
-                                self.__TimeStep(step)
-                                if(step % 240 == 239):
+                                if((step == 2879) & (step > 0)):
+
                                     y = self.U_POD.dot(self.y_red)
+
                                     y_hig = io.read_PETSc_vec(self.monitor_path % (spin,step))
                                     io.write_PETSc_vec(y, self.out_path % (spin,step))
-                                    print("spin: ", spin,"step: ", step,"t:", self.t,"norm: ", np.linalg.norm(y-y_hig))
+                                    print("time: ", time.time() - starttime ,"spin: ", spin,"step: ", step,"t:", self.t,"error norm: " ,np.linalg.norm(y-y_hig), "spinup norm: ", np.linalg.norm(y-self.y))
+                                    timings[spin] = time.time() - starttime
+                                    starttime = time.time()
+                                    self.y = y 
+                                #bgcTime[step],multTime[step],interpolationTime[step] = self.__TimeStep(step)
+                                self.__TimeStep(step)
+                       #np.save(self.out_path %(spin,step) + "_bgc_timeings.npy",bgcTime)
+                        #np.save(self.out_path %(spin,step) + "_bgcStep_timeings.npy",bgcStepTime)
+                        #np.save(self.out_path %(spin,step) + "_mult_timeings.npy",multTime)
+                        #np.save(self.out_path %(spin,step) + "_interpolation_timeings.npy",interpolationTime)
 
+                np.save(self.out_path %(spin,step) + "_timeings.npy",timings)
 
 
 
@@ -111,6 +136,7 @@ class ReducedModel:
                 q = np.zeros(52749,dtype=np.float_)
                 t = 0
                 #q_select = np.zeros(p.shape[0],dtype=np.float_)
+                starttime =time.time()
                 for spin in range(nspinup):
                         for step in range(ntimestep):
                                 t = np.fmod(0 + step*self.dt, 1.0);
@@ -127,22 +153,27 @@ class ReducedModel:
                                 Aeint = self.interpolation_a[step]*Ae[self.interpolation_j[step]] + self.interpolation_b[step]*Ae[self.interpolation_k[step]]    
 
 
-                                v = io.read_PETSc_vec("simulation/compare/sp%.4dts%.4dN.petsc" % (spin,step+1))
-                                Aey = io.read_PETSc_vec("simulation/compare/Aey_sp%.4dts%.4dN.petsc" % (spin,step))
-                                Aeq = io.read_PETSc_vec("simulation/compare/Ae+q_sp%.4dts%.4dN.petsc" % (spin,step))
-                                q_v = io.read_PETSc_vec("simulation/compare/q_sp%.4dts%.4dN.petsc" % (spin,step))
-                                Aiint_metos = io.read_PETSc_mat("simulation/compare/A%.4d.petsc" % (step))
-                                print("norm A interplaton: ", (Aiint-Aiint_metos))
+                      
+                                #Aey = io.read_PETSc_vec("simulation/compare/Aey_sp%.4dts%.4dN.petsc" % (spin,step))
+                                #Aeq = io.read_PETSc_vec("simulation/compare/Ae+q_sp%.4dts%.4dN.petsc" % (spin,step))
+                                #q_v = io.read_PETSc_vec("simulation/compare/q_sp%.4dts%.4dN.petsc" % (spin,step))
+                                #Aiint_metos = io.read_PETSc_mat("simulation/compare/A%.4d.petsc" % (step))
+                                #print("norm A interplaton: ", (Aiint-Aiint_metos))
 
                                 ye = Aeint.dot(y)
                                 yeq = ye +q 
-                                io.write_PETSc_vec(yeq,"yeqts%.4dN.petsc" % step)
+                                #io.write_PETSc_vec(yeq,"yeqts%.4dN.petsc" % step)
                                 # A_saved = io.read_PETSc_mat("Ai_interpolatedts%.4d.petsc" % step)
                                 y_j = Aiint.dot(yeq)
-                                print("q:", np.linalg.norm(q_v-q))
-                                print("before Ai:", np.linalg.norm(Aeq-yeq))
-                                print("after Ai:",np.max(y_j-v))
-                                io.write_PETSc_vec(y_j,"yts%.4dN.petsc" % step)
-                                io.write_PETSc_mat(Aiint,"Ai%.4dN.petsc" % step)
+                                #print("q:", np.linalg.norm(q_v-q))
+                                #print("before Ai:", np.linalg.norm(Aeq-yeq))
+                                #print(step,spin)
+                                if(step % 240 == 239):
+                                    v = io.read_PETSc_vec("simulation/POD_DEIM/sp%.4dts%.4dN.petsc" % (spin,step))
+                                    print("time: ", time.time() - starttime ,spin,step,np.linalg.norm(y-v))
+                                    io.write_PETSc_vec(y_j,"simulation/compare/exp01/sp%.4dts%.4dN.petsc" % (spin,step))
+                                    starttime = time.time()
+                                #io.write_PETSc_mat(Aiint,"Ai%.4dN.petsc" % step)
                                 # print(Aiint-A_saved.T)
                                 y = y_j
+                               
