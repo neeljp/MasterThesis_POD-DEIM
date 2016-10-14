@@ -1,0 +1,71 @@
+
+\chapter{Conclusion and Future Work} % Main chapter title
+
+\label{Chapter6} % For referencing the chapter elsewhere, use \ref{Chapter1} 
+
+%----------------------------------------------------------------------------------------
+
+\section{Conclusion}
+In this thesis, the nonlinear MOR method POD-DEIM has been applied to three different marine ecosystem models of the software package Metos3D.
+Therefore, the reduced model equations \eqref{metos_red} were established and implemented. Then, an analysis of the one
+tracer model, the N-Model, was made, in which the feasibility was tested. 
+For that the manner of how many information from the full-order model are needed for an accurate reduced-order model was investigated.
+Moreover, it was examined how the size of the reduced bases affect the accuracy and CPU time of the reduced-order model.
+On the basis of these results six reduced-order models of the N-Model were compared to the full-order model.
+The approach was extended on the two tracer model, the N-DOP-Model, and two reduced-order models were compared to the full-order N-DOP-Model.
+Afterwards, it was tried to create reduced-order models of the N-Model, which could be used for parameter studies.
+For that two approaches were tested. The first one was to create a reduced-order model out of multiple trajectories created with different parameter sets.
+And the other one was to use one reduced-order model for multiple parameter sets.
+
+
+One main goal of this thesis was to demonstrate the feasibility of the nonlinear MOR method POD-DEIM on 
+marine ecosystem models with respect to accuracy and computational speed up. The numerical experiments in Chapter \ref{Chapter4}
+have demonstrated the feasibility for a fixed set of parameters. The POD-DEIM approach leads to a significant speed up and a solution that is close to that of the full-order model measured in the 2-norm. For the N-DOP-Model the speed up is smaller because of
+the fact that a base for each tracer has to be used to get an accurate reduced-order model.
+
+
+The idea of using the POD-DEIM approach to get a reduced-order model for parameter studies has turned out to be not practical.
+The main reason for that is diversity of the solutions for different sets of parameters, and thus, 
+the approximation within a low dimensional subspace is very inaccurate.
+
+
+\section{Future Work}
+At this point, some directions for future research, that might build
+up on the work of this thesis, are presented. 
+
+\subsubsection*{Selection of snapshots}
+
+
+In Chapter \ref{Chapter4_N} the selection of snapshots for the SVD is not optimal and could be further improved.
+Since there is no theoretical approach to optimize the selection, it is only possible with numerical experiments.
+A problem in that area is the soft upper bound of the total number of snapshots that is given by the SVD algorithm.
+For that the Algorithm 5.1 in \cite{PODDeimapplication} may be interesting.
+This algorithm uses the Gram-Schmidt QR factorization with a reorthogonalization algorithm from \cite{Daniel2007ReorthogonalizationAS}.
+The algorithm detects and eliminates redundant snapshots as well as prevents the loss of orthogonality of the POD basis due to the numerical instability of the Gram–Schmidt process.
+
+
+\subsubsection*{Creating a reduced-order model for parameter studies}
+For parameter studies it could be tried to create a reduced-order model only for a subset of the parameters, thus, changing only some parameters and leave the others fixed.
+This could lead to a usable model since the space spanned by the solution should be smaller. Another idea is to create a reduced-order model for a subspace of the parameter space, thus use all parameters but only create a model for 
+parameters in the range of $u_r \pm x\%$. The idea is the same, the reduction of the solution space, and thus, a better low dimensional approximation. 
+
+\subsubsection*{Create combined ROMs}
+After the experiments that are showed in Appendix \ref{A:last_year}, two ideas came up. 
+Since the convergence of the ROM presented in Appendix \ref{A:last_year} is much faster, than the convergence 
+of the ROMs presented in Chapter \ref{behaviorofroms}, the first idea is to increase the overall speed up by using 
+multiple of these ROMs. Each ROM has to be created with a  full trajectory of a different  model year, i.e. 500, 1000, 2000, 3000. 
+Then the first model is initialized with a starting concentration and simulated until it has reach the point, where
+it starts to diverge. Now the next ROM is initialized with the solution of the previous one and simulated until 
+they reached their point of divergence. This could lead to a increase of the overall speed up and could increase the accuracy
+as well, if enough ROMs are used. 
+
+The other idea is to use a ROM, as in Appendix \ref{A:last_year}, 
+in the opposite way it is used in Chapter \ref{behaviorofroms}. There the ROMs is executed first and the solution it has generated was then improved
+with the full-order model. It could be feasible to run the FOM until 1000 or 2000 model years and then supply this 
+solution into a ROM as in Appendix \ref{A:last_year}. Because initialized with a solution from that point the ROM converges much faster, than the FOM.
+After executing the ROM the solution could also be improved with the FOM.
+
+The benefit of these two approaches is that a lot of spin-ups are ``skipped'', and thus, the overall speed up would be much higher than it is presented in Chapter \ref{behaviorofroms}.
+
+
+

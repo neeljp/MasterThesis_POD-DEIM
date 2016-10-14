@@ -1,0 +1,87 @@
+% Chapter 1
+
+\chapter{Introduction} % Main chapter title
+
+\label{Chapter1} % For referencing the chapter elsewhere, use \ref{Chapter1} 
+
+%----------------------------------------------------------------------------------------
+
+% Define some commands to keep the formatting separated from the content 
+\newcommand{\keyword}[1]{\textbf{#1}}
+\newcommand{\tabhead}[1]{\textbf{#1}}
+\newcommand{\code}[1]{\texttt{#1}}
+\newcommand{\file}[1]{\texttt{\bfseries#1}}
+\newcommand{\option}[1]{\texttt{\itshape#1}}
+
+%----------------------------------------------------------------------------------------
+
+\section{Motivation}
+Numerical simulations of dynamical systems are extremely successful for the means of studying complex physical, biological or chemical
+phenomena. However the spatial and temporal dimensionality of those simulations often increase to the limits of computational requirements, storage and time.
+One possible approach to overcome this is model reduction.
+
+Model reduction has become imported for many fields of physics as they offer the potential to simulate dynamical systems with
+a substantially increased computation efficiency. The technique is a mathematical approach to find a low-dimensional 
+approximation for a system of ordinary differential equations. The goal is to determine a low-dimensional system that has the same
+solution characteristics as the original system, but needs less storage and evaluation time.
+
+This approach is used in particular for models, that model the physics of the complex earths climate 
+and have large spatial and temporal scales. Thus if they provide a certain accuracy, they need a lot of computation time. 
+For these systems it is a balancing act between computation time and accuracy in time and space, and
+usually the computational resources are the limiting factor. 
+
+In addition these models are often controlled by a
+set of parameters and a common problem is to find a certain set of parameters. Which results in an, in some way, optimal solution,
+for example in a solution that is close to real measurements. This search for a set of parameters requires, in most cases, many evaluations of the model, so
+the computational cost is potentially higher. The idea is to use a reduced model for parts of this parameter search, to
+lower the computational time.
+
+In this thesis, model reduction of a marine ecosystem model will be investigated. Marine ecosystem models play an imported role 
+in research of the global carbon cycle as well as for questions on climate change. They have huge spatial scale if they provide 
+a certain accuracy. The resulting  partial differential equations are in there discrete form high in dimension. Also the temporal 
+domain is large, because effects in the ocean take several thousand years to fully spread and thus these models need this time to approach
+a steady-state. This results from 
+the circulation circle of the ocean. It is estimated that it can take up to 1000 years for a parcel of water to complete one circle.
+In addition to the ocean circulation a marine biogeochemistry model describes the marine chemistry, biology and the 
+geological processes that occur in the ocean. These processes are controlled by a set of parameter of which some are not directly measurable.
+Thus, parameter optimization is needed to fit the model output to real observations. Therefore, there is a strong demand
+for model reduction for this kind of model. 
+
+
+\section{Existing Methods}
+Model Reduction or Model Order Reduction (MOR) was developed in the context of linear control theory. It is today
+a wide field research in system and control theory and numerical mathematics such as signal analysis and
+fluid dynamics. Most work has been done for linear MOR and the generally used methods are discussed in \cite{MOR2008}.
+Among them the so-called Proper Orthogonal Decomposition (POD) also known as Karhunen-Loeve decomposition or Principal Component Analysis.
+POD has been successfully applied to a wide field of research including pattern recognition \cite{PCAimagepattern,patternrec} , fluid dynamics \cite{A_anoptimizing,PODSWF}, turbulent flows \cite{Wang201210,Berkooz93theproper} and other numerical simulations \cite{Luo2016433,Buchan2015138}.
+The POD method combined with Galerkin projection is a popular approach for constructing reduced-order models of PDEs. This approach has provided reduced-order models in many applications such as fluid dynamics, aerodynamics and optimal control.
+Also it has been used for large scale systems with a high dimensional parametric input space. According to \cite{PODover},
+where also a historical overview of the POD approach can be found, the first usage of POD for MOR of a 
+dynamical system was in the 1990s, cf. \cite{PODfirst}.
+
+The POD-Galerkin method only reduces linear parts and therefore another method is needed to reduce the complexity of the nonlinear terms.
+Discrete Empirical Interpolation Method (DEIM) proposed by \cite{Chaturantabut2010Deim,PHDCha} expands the POD approach to construct
+an interpolation of the nonlinear part. It is a discrete simplification of the Empirical Interpolation Method
+(EIM) introduced by \cite{EIM}. The POD-DEIM approach has been applied to dynamical processes \cite{PODDeimapplication,PODDeimshallowwater,PODdeimpredetor,Xiao20141} and has
+shown that it leads to a computational gain in complexity. 
+
+The marine ecosystem model, which will be used here, has been introduced by \cite{metosidea}. The simulation
+package Metos3D, that implements the model, is described briefly in Chapter \ref{Chapter3} and a full description is presented in \cite{metos3dsimpack}. 
+
+\section{Outline} 
+The work in this thesis is structured as follows: 
+In Chapter 2 the problem is formulated and the POD approach and its extension the DEIM is explained. The next chapter 
+introduces into the model behind Metos3D and shows the theoretically application of the POD-DEIM approach on this model.
+Chapter 4 presents the results of the numerical experiments with some of the models Metos3D provides. It starts with an 
+extensive analysis of the simplest model, called N-Model. Afterwards, a more complex model with two tracers is presented, 
+the N-DOP-model. The results of the experiments for parameters studies with reduced-order models of the N-Model are content of 
+Chapter 5.
+The last chapter presents a conclusion and an outlook on future research questions that had come up
+during this thesis, but were not considered.
+
+
+
+
+
+
+

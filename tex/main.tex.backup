@@ -1,0 +1,352 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Masters/Doctoral Thesis 
+% LaTeX Template
+% Version 2.3 (25/3/16)
+%
+% This template has been downloaded from:
+% http://www.LaTeXTemplates.com
+%
+% Version 2.x major modifications by:
+% Vel (vel@latextemplates.com)
+%
+% This template is based on a template by:
+% Steve Gunn (http://users.ecs.soton.ac.uk/srg/softwaretools/document/templates/)
+% Sunil Patel (http://www.sunilpatel.co.uk/thesis-template/)
+%
+% Template license:
+% CC BY-NC-SA 3.0 (http://creativecommons.org/licenses/by-nc-sa/3.0/)
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%----------------------------------------------------------------------------------------
+%	PACKAGES AND OTHER DOCUMENT CONFIGURATIONS
+%----------------------------------------------------------------------------------------
+
+\documentclass[
+12pt, % The default document font size, options: 10pt, 11pt, 12pt
+%oneside, % Two side (alternating margins) for binding by default, uncomment to switch to one side
+openany,
+%chapterinoneline,% Have the chapter title next to the number in one single line
+english, % ngerman for German
+onehalfspacing, %singlespacing, % Single line spacing, alternatives: onehalfspacing or doublespacing
+%draft, % Uncomment to enable draft mode (no pictures, no links, overfull hboxes indicated)
+%nolistspacing, % If the document is onehalfspacing or doublespacing, uncomment this to set spacing in lists to single
+%liststotoc, % Uncomment to add the list of figures/tables/etc to the table of contents
+%toctotoc, % Uncomment to add the main table of contents to the table of contents
+%parskip, % Uncomment to add space between paragraphs
+%nohyperref, % Uncomment to not load the hyperref package
+headsepline, % Uncomment to get a line under the header
+]{MastersDoctoralThesis} % The class file specifying the document structure
+
+\usepackage[utf8]{inputenc} % Required for inputting international characters
+\usepackage[T1]{fontenc} % Output font encoding for international characters
+
+\usepackage{palatino} % Use the Palatino font by default
+
+\usepackage[backend=bibtex,style=numeric,natbib=true,sorting=none]{biblatex} % Use the bibtex backend with the authoryear citation style (which resembles APA)
+
+\addbibresource{main.bib} % The filename of the bibliography
+
+\usepackage[autostyle=true]{csquotes} % Required to generate language-dependent quotes in the bibliography
+
+%math 
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{multirow}
+%Algorithmic
+\usepackage{algorithm}% http://ctan.org/pkg/algorithms
+\usepackage{algpseudocode}% http://ctan.org/pkg/algorithmicx
+\usepackage{algorithmicx}
+\usepackage{tikz}
+
+\usepackage{caption}
+\usepackage{subcaption}
+ 
+
+
+
+\usetikzlibrary{shapes,arrows}
+% Define block styles
+\tikzstyle{block} = [rectangle, draw, 
+    text width=10em, text centered, rounded corners, minimum height=8em]
+    \tikzstyle{blocklong} = [rectangle, draw, 
+    text width=20em, text centered, rounded corners, minimum height=8em]
+\tikzstyle{line} = [draw, -latex']
+\tikzstyle{mylabel}= [ draw, rectangle, align=center, rounded corners, font=\small\bf, inner sep=2ex, minimum height=8cm]
+
+\newtheorem{mydef}{Definition}
+\newtheorem{mytheo}{Theorm}
+\newcommand*{\vertbar}{\rule[-1ex]{0.5pt}{2.5ex}}
+
+
+%----------------------------------------------------------------------------------------
+%	MARGIN SETTINGS
+%----------------------------------------------------------------------------------------
+
+\geometry{
+	paper=a4paper, % Change to letterpaper for US letter
+	inner=2cm, % Inner margin
+	outer=2cm, % Outer margin
+	bindingoffset=1cm, % Binding offset
+	top=1.5cm, % Top margin
+	bottom=2cm, % Bottom margin
+	%showframe,% show how the type block is set on the page
+}
+
+%----------------------------------------------------------------------------------------
+%	THESIS INFORMATION
+%----------------------------------------------------------------------------------------
+
+\thesistitle{Nonlinear Model Order Reduction of a marine ecosystem model using POD-DEIM} % Your thesis title, this is used in the title and abstract, print it elsewhere with \ttitle
+\supervisor{Prof. Dr. Thomas \textsc{Slawig} } % Your supervisor's name, this is used in the title page, print it elsewhere with \supname
+\examiner{Dr. Jaroslaw \textsc{Piwonski}} % Your examiner's name, this is not currently used anywhere in the template, print it elsewhere with \examname
+\degree{Master of Science} % Your degree name, this is used in the title page and abstract, print it elsewhere with \degreename
+\author{Neel Johann \textsc{Peters}} % Your name, this is used in the title page and abstract, print it elsewhere with \authorname
+%\addresses{} % Your address, this is not currently used anywhere in the template, print it elsewhere with \addressname
+
+\subject{Numerische Mathematik und Optimierung Sciences} % Your subject area, this is not currently used anywhere in the template, print it elsewhere with \subjectname
+\keywords{} % Keywords for your thesis, this is not currently used anywhere in the template, print it elsewhere with \keywordnames
+\university{University of Kiel} % Your university's name and URL, this is used in the title page and abstract, print it elsewhere with \univname
+\department{Department of Computer Science} % Your department's name and URL, this is used in the title page and abstract, print it elsewhere with \deptname
+\group{Algorithmic Optimal Control} % Your research group's name and URL, this is used in the title page, print it elsewhere with \groupname
+\faculty{} % Your faculty's name and URL, this is used in the title page and abstract, print it elsewhere with \facname
+
+\hypersetup{pdftitle=\ttitle} % Set the PDF's title to your title
+\hypersetup{pdfauthor=\authorname} % Set the PDF's author to your name
+\hypersetup{pdfkeywords=\keywordnames} % Set the PDF's keywords to your keywords
+
+\begin{document}
+
+\frontmatter % Use roman page numbering style (i, ii, iii, iv...) for the pre-content pages
+
+\pagestyle{plain} % Default to the plain heading style until the thesis style is called for the body content
+
+%----------------------------------------------------------------------------------------
+%	TITLE PAGE
+%----------------------------------------------------------------------------------------
+
+\begin{titlepage}
+\begin{center}
+
+{\scshape\LARGE \univname\par}\vspace{1.5cm} % University name
+\textsc{\Large Master Thesis}\\[0.5cm] % Thesis type
+\textsc{ \groupname}\\[0cm]
+\textsc{ \deptname}\\[0.5cm]
+
+
+
+
+\HRule \\[0.4cm] % Horizontal line
+{\huge \bfseries \ttitle\par}\vspace{0.4cm} % Thesis title
+\HRule \\[1.5cm] % Horizontal line
+ 
+\begin{minipage}[t]{0.4\textwidth}
+\begin{flushleft} \large
+\emph{Author:}\\
+{\authorname} % Author name - remove the \href bracket to remove the link
+\end{flushleft}
+\end{minipage}
+\begin{minipage}[t]{0.4\textwidth}
+\begin{flushright} \large
+\emph{Supervisors:} \\
+{\supname}\\ % Supervisor name - remove the \href bracket to remove the link  
+{\examname}
+\end{flushright}
+\end{minipage}\\[3cm]
+ 
+%\large \textit{A thesis submitted in fulfillment of the requirements\\ for the degree of \degreename}\\[0.3cm] % University requirement text
+%\textit{in the}\\[0.4cm]
+%\groupname\\\deptname\\[2cm] % Research group name and department name
+ 
+{\large \today}\\[4cm] % Date
+%\includegraphics{Logo} % University/department logo - uncomment to place it
+ 
+\vfill
+\end{center}
+\end{titlepage}
+
+%----------------------------------------------------------------------------------------
+%	DECLARATION PAGE
+%----------------------------------------------------------------------------------------
+
+\begin{declaration}
+\addchaptertocentry{\authorshipname}
+
+\noindent I, \authorname, declare that this thesis titled, \enquote{\ttitle} and the work presented in it are my own. I confirm that:
+
+\begin{itemize} 
+\item This work was done mainly while in candidature for a research degree at this University.
+\item Where any part of this thesis has previously been submitted for a degree or any other qualification at this University or any other institution, this has been clearly stated.
+\item Where I have consulted the published work of others, this is always clearly attributed.
+\item Where I have quoted from the work of others, the source is always given. With the exception of such quotations, this thesis is entirely my own work.
+\item I have acknowledged all main sources of help.
+\item Where the thesis is based on work done by myself jointly with others, I have made clear exactly what was done by others and what I have contributed myself.\\
+\end{itemize}
+ 
+\noindent Signed:\\
+\rule[0.5em]{25em}{0.5pt} % This prints a line for the signature
+ 
+\noindent Date:\\
+\rule[0.5em]{25em}{0.5pt} % This prints a line to write the date
+\end{declaration}
+
+\cleardoublepage
+
+%----------------------------------------------------------------------------------------
+%	QUOTATION PAGE
+%----------------------------------------------------------------------------------------
+
+%\vspace*{0.2\textheight}
+
+%\noindent\enquote{\itshape Thanks to my solid academic training, today I can write hundreds of words on virtually any topic without possessing a shred of information, which is how I got a good job in journalism.}\bigbreak
+
+%\hfill Dave Barry
+
+%----------------------------------------------------------------------------------------
+%	ABSTRACT PAGE
+%----------------------------------------------------------------------------------------
+
+\begin{abstract}
+\addchaptertocentry{\abstractname} % Add the abstract to the table of contents
+A Discrete Empirical Interpolation Method (DEIM) is applied in conjunction with \\
+Proper
+Orthogonal Decomposition (POD) to construct nonlinear reduced-order models of marine ecosystem models. 
+The POD approach is used to extract a low dimensional basis that optimally
+captures the dominant characteristics of the full-order model trajectory. This basis is used with
+a Galerkin projection to construct a reduced-order system. DEIM is applied to
+resolve the complexity issue in the nonlinear term of the POD reduced system.
+Numerical results demonstrate that the full-order system can be reduced with the POD-DEIM
+for a fixed parameter set. Creating reduced-oder models with POD-DEIM for parameter studies have
+tuned out to be not practical with the marine ecosystem models. 
+\end{abstract}
+
+%----------------------------------------------------------------------------------------
+%	ACKNOWLEDGEMENTS
+%----------------------------------------------------------------------------------------
+
+\begin{acknowledgements}
+\addchaptertocentry{\acknowledgementname} % Add the acknowledgements to the table of contents
+I would like to thank the supervisors of my Master thesis, Jaroslaw Piwonski and Thomas Slawig. The meetings with them always were 
+inspiring, motivating and, on a personal level, delightful. 
+
+Since the beginning of my studies, my parents and brothers and sisters were always there when I needed them
+and never ended their support. I am very thankful for their presence.
+
+For the constructive advises to improve this thesis, I would like to thank Jenny and Lasse.  
+
+Also I would like to thank some people for the great time and distraction during the time working on this thesis, 
+that help me to get new ideas and motivation.
+Doing acrobatic with the AkroKiel group, especially with Christian, Josi, Irene and Lena, was and is every time wonderful and jocular. 
+In addition to that, I would like to thank Lasse for all the witty discussions 
+about this thesis and everything else that popped up in our minds during cooking and eating.
+\end{acknowledgements}
+
+
+%----------------------------------------------------------------------------------------
+%	LIST OF CONTENTS/FIGURES/TABLES PAGES
+%----------------------------------------------------------------------------------------
+
+\tableofcontents % Prints the main table of contents
+
+%----------------------------------------------------------------------------------------
+%	ABBREVIATIONS
+%----------------------------------------------------------------------------------------
+
+\begin{abbreviations}{ll} % Include a list of abbreviations (a table of two columns)
+\textbf{DEIM} & \textbf{D}iscrete \textbf{E}mpirical \textbf{I}nterpolation \textbf{M}ethod\\
+\textbf{DOP} & \textbf{D}issolved \textbf{O}rganic \textbf{P}hosphorus\\
+\textbf{EIM} & \textbf{E}mpirical \textbf{I}nterpolation \textbf{M}ethod\\
+\textbf{FOM} & \textbf{F}ull-\textbf{O}rder \textbf{M}odel\\
+\textbf{GCM} & \textbf{G}eneral \textbf{C}irculation \textbf{M}odel\\
+\textbf{Metos3D} & \textbf{M}arine \textbf{E}cosystem \textbf{T}oolkit for \textbf{O}ptimization and \textbf{S}imulation in \textbf{3-D}\\
+\textbf{MOR} & \textbf{M}odel \textbf{O}rder \textbf{R}eduction\\
+\textbf{N} & Phosphate $P0_4$\\
+\textbf{ODE} & \textbf{O}rdinary  \textbf{D}ifferential\textbf{E}quation\\
+\textbf{POD} & \textbf{P}roper \textbf{O}rthogonal \textbf{D}ecomposition\\
+\textbf{ROM} & \textbf{R}educed-\textbf{O}rder \textbf{M}odel\\
+\textbf{SVD} & \textbf{S}ingular \textbf{V}alue \textbf{D}ecomposition\\
+\textbf{TMM} & \textbf{T}ransport \textbf{M}atrix \textbf{M}ethod\\
+\end{abbreviations}
+
+
+\listoffigures % Prints the list of figures
+\begingroup
+\let\clearpage\relax
+\listoftables % Prints the list of tables
+\endgroup
+
+
+
+%----------------------------------------------------------------------------------------
+%	PHYSICAL CONSTANTS/OTHER DEFINITIONS
+%----------------------------------------------------------------------------------------
+
+%\begin{constants}{lr@{${}={}$}l} % The list of physical constants is a three column table
+
+% The \SI{}{} command is provided by the siunitx package, see its documentation for instructions on how to use it
+
+%	Speed of Light & $c_{0}$ & \SI{2.99792458e8}{\meter\per\second} (exact)\\
+%Constant Name & $Symbol$ & $Constant Value$ with units\\
+
+%\end{constants}
+
+%----------------------------------------------------------------------------------------
+%	SYMBOLS
+%----------------------------------------------------------------------------------------
+
+%\begin{symbols}{lll} % Include a list of Symbols (a three column table)
+
+%$a$ & distance & \si{\meter} \\
+%$P$ & power & \si{\watt} (\si{\joule\per\second}) \\
+%Symbol & Name & Unit \\
+
+%\addlinespace % Gap to separate the Roman symbols from the Greek
+
+%$\omega$ & angular frequency & \si{\radian} \\
+
+%\end{symbols}
+
+%----------------------------------------------------------------------------------------
+%	DEDICATION
+%----------------------------------------------------------------------------------------
+
+%\dedicatory{For/Dedicated to/To my\ldots} 
+
+%----------------------------------------------------------------------------------------
+%	THESIS CONTENT - CHAPTERS
+%----------------------------------------------------------------------------------------
+
+\mainmatter % Begin numeric (1,2,3...) page numbering
+
+\pagestyle{thesis} % Return the page headers back to the "thesis" style
+% Include the chapters of the thesis as separate files from the Chapters folder
+% Uncomment the lines as you write the chapters
+
+\include{Chapters/Chapter1}
+\include{Chapters/Chapter2} 
+\include{Chapters/Chapter3}
+\include{Chapters/Chapter4} 
+\include{Chapters/Chapter5} 
+\include{Chapters/Chapter6} 
+%----------------------------------------------------------------------------------------
+%	THESIS CONTENT - APPENDICES
+%----------------------------------------------------------------------------------------
+
+\appendix % Cue to tell LaTeX that the following "chapters" are Appendices
+
+% Include the appendices of the thesis as separate files from the Appendices folder
+% Uncomment the lines as you write the Appendices
+
+\include{Appendices/AppendixA}
+%\include{Appendices/AppendixB}
+%\include{Appendices/AppendixC}
+
+%----------------------------------------------------------------------------------------
+%	BIBLIOGRAPHY
+%----------------------------------------------------------------------------------------
+
+\printbibliography[heading=bibintoc]
+
+%----------------------------------------------------------------------------------------
+
+\end{document}  

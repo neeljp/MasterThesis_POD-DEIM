@@ -1,0 +1,34 @@
+\boolfalse {citerequest}\boolfalse {citetracker}\boolfalse {pagetracker}\boolfalse {backtracker}\relax 
+\defcounter {refsection}{0}\relax 
+\select@language {english}
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {2.1}{\ignorespaces An overview on the workflow of model reduction.\relax }}{13}{figure.caption.52}
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {4.1}{\ignorespaces Distribution of singular values from a SVD of $12\_3000$, a matrix of snapshots distributed over the whole year.\relax }}{18}{figure.caption.66}
+\contentsline {figure}{\numberline {4.2}{\ignorespaces Distribution of singular values from an SVD of $3\_3000$ a matrix of snapshots taken only in winter.\relax }}{19}{figure.caption.67}
+\contentsline {figure}{\numberline {4.3}{\ignorespaces Relative error $\mathcal {E}$ during the course of a year for two different bases.}}{20}{figure.caption.69}
+\contentsline {figure}{\numberline {4.4}{\ignorespaces Distribution of singular values from an SVD of different snapshot matrices.\relax }}{21}{figure.caption.70}
+\contentsline {figure}{\numberline {4.5}{\ignorespaces The average relative error and the average CPU time of different ROMs of the N-Model.}}{22}{figure.caption.73}
+\contentsline {figure}{\numberline {4.6}{\ignorespaces The average relative error $\bar {\mathcal {E}}$ compared to the error bounds \textup {\hbox {\mathsurround \z@ \normalfont (\ignorespaces \ref {ch2:error_bound_pod}\unskip \@@italiccorr )}},\textup {\hbox {\mathsurround \z@ \normalfont (\ignorespaces \ref {ch2:error_bound_deim}\unskip \@@italiccorr )}} of the POD-DEIM approach.\relax }}{23}{figure.caption.74}
+\contentsline {figure}{\numberline {4.7}{\ignorespaces Spin-up norm of different reduced-order models in comparison with the spin-up norm of the full-order model.\relax }}{24}{figure.caption.77}
+\contentsline {figure}{\numberline {4.8}{\ignorespaces Relative error $\mathcal {E}$ of different reduced-order models.\relax }}{25}{figure.caption.78}
+\contentsline {figure}{\numberline {4.9}{\ignorespaces Distribution of the singular values of 36\_1000 from the N-DOP-Model.\relax }}{29}{figure.caption.81}
+\contentsline {figure}{\numberline {4.10}{\ignorespaces Spin-up norm of two ROMs in comparison with the spin-up norm of the FOM of N-DOP.\relax }}{30}{figure.caption.82}
+\contentsline {figure}{\numberline {4.11}{\ignorespaces Relative error $\mathcal {E}$ of two ROMs of the N-DOP-Model.\relax }}{31}{figure.caption.83}
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {5.1}{\ignorespaces Distribution of singular values of $S$ and $S_q$.\relax }}{34}{figure.caption.86}
+\contentsline {figure}{\numberline {5.2}{\ignorespaces The relative error between the ROM $36\_3000P300D300$ and the FOM for different sets of parameters.}}{35}{figure.caption.87}
+\contentsline {figure}{\numberline {5.3}{\ignorespaces The relative error between the ROM $36\_3000P300D300$ and the FOM solution of $u_r$.}}{36}{figure.caption.88}
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {A.1}{\ignorespaces Distribution of singular values from a SVD of $2880\_1_{3000}$, a matrix of snapshots of a full trajectory of the model year 3000.\relax }}{40}{figure.caption.97}
+\contentsline {figure}{\numberline {A.2}{\ignorespaces Relative error $\mathcal {E}$ of the reduced-order model $2880\_1_{3000}P150D150$ initialized with an uniformly distributed concentration to the FOM.}}{41}{figure.caption.98}
+\contentsline {figure}{\numberline {A.3}{\ignorespaces Relative error $\mathcal {E}$ of the reduced-order model $2880\_1_{3000}P150D150$ initialized with the solution of model year 2000 of the FOM.}}{42}{figure.caption.99}
+\contentsline {figure}{\numberline {A.4}{\ignorespaces Spin-up norm of the reduced-order model $2880\_1_{3000}P150D150$ in comparison with the spin-up norm of the full-order model.\relax }}{43}{figure.caption.100}
+\contentsline {figure}{\numberline {A.5}{\ignorespaces Absolute error of a model run with python and with PETSc}}{44}{figure.caption.102}
+\contentsline {figure}{\numberline {A.6}{\ignorespaces Distribution of the computational time among main operations of the N-Model during the computation of a model year. The BGCStep part indicates the time that is needed to evaluate the nonlinear function.\relax }}{44}{figure.caption.104}
+\contentsline {figure}{\numberline {A.7}{\ignorespaces Distribution of the computational time among main operations of the N-DOP-Model during the computation of a model year.The BGCStep part indicates the time that is needed to evaluate the nonlinear function.\relax }}{45}{figure.caption.105}
+\contentsline {figure}{\numberline {A.8}{\ignorespaces Relative error between different model runs and the FOM solution generated with $u_{LHC_0}$.}}{46}{figure.caption.109}
+\contentsline {figure}{\numberline {A.9}{\ignorespaces Relative error between different model runs and the FOM solution generated with $u_r + 50\%$.}}{47}{figure.caption.110}

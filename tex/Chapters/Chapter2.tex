@@ -1,0 +1,396 @@
+% Chapter 2
+
+\chapter{Nonlinear Model Reduction with POD-DEIM} % Main chapter title
+
+\label{Chapter2} % For referencing the chapter elsewhere, use \ref{Chapter1} 
+
+This chapter presents a model reduction method for nonlinear ordinary differential equation
+(ODEs). First a general formulation of the problem is given and its reduction via Proper Orthogonal Decomposition
+(POD) with Galerkin projection is shown. Continued with a discussion of the complexity issue in the nonlinear part.
+To resolve this issue the Discrete Empirical Interpolation Method (DEIM) is introduced in \ref{Chapter2:deim}.
+This method extends the orthogonal projection of POD in the nonlinear part with an interpolation of the nonlinear function.
+The DEIM was fist introduced by Saifon Chaturantabut in \cite{Chaturantabut2010Deim}, where also the algorithm
+and the error bound analysis presented in \ref{Chapter2:deim} comes from.
+
+\section{Problem Formulation}
+\label{Chapter2:problem}
+Consider a system of nonlinear differential equations of the form
+\begin{equation}
+\label{problem:ODE}
+ \frac{d}{dt}y(t) = Ay(t) + q(y(t))
+\end{equation}
+where $t \in [0,T]$ denotes the time, $y(t) = [y_1(t),\dots,y_n(t)]^T \in \mathbb{R}^n$ is a vector of states with
+initial condition $y(0) = y_0 \in \mathbb{R}^n$ , $A \in \mathbb{R}^{n \times n}$ is the discrete approximation of the 
+linear differential operator and $q:\mathbb{R}^n \longmapsto \mathbb{R}^n$ a nonlinear vector-based function.
+The complexity, both time and space, to solve the system is mostly depended on the dimension $n$ of the system. Which could be very large, if
+high accuracy is required, thus, to reduce the complexity, we want to reduce the dimension.
+
+In order to do  this the system will be projected on a subspace spanned in $\mathbb{R}^n$ by a reduced basis of a dimension $k \ll n$.
+These projection-based techniques are commonly used for constructing a reduced-order system, that approximates the
+original system in a subspace. Here a Galerkin projection is used as the means for dimension reduction.
+For that let $V \in \mathbb{R}^{n \times k}$ be a matrix whose columns are the orthonormal vectors of the reduced
+basis. Then projecting the system \eqref{problem:ODE} onto $V$ by replacing $y(t)$ with $V\hat{y}(t)$, where $\hat{y}(t)$ 
+$\in \mathbb{R}^k$, is the reduced system of the form
+\begin{equation}\label{Chapter2:problem_pod}
+  \frac{d}{dt}\hat{y}(t) = V^TAV\hat{y}(t) + V^Tq(V\hat{y}(t)).
+\end{equation}
+The quality of the approximation is clearly affected by the choice of the reduced basis vectors in $V$. The POD method constructs a set of basis
+vectors from a singular value decomposition (SVD) of a set of snapshots
+\begin{equation}
+ S = \{y_1,\dots,y_m\},
+\end{equation}
+which contains samples of trajectories $y(\cdot)$ (called snapshots) for a particular set of parameters, boundary condition and other system inputs. 
+After a reduced model has
+been constructed from this basis, it may be used to compute approximate solutions for different initial conditions
+and parameter settings. If the snapshots are diverse enough it is expected that the approximate solution is near to the high dimensional one.
+The POD basis is optimal in the sense that a approximation error in relation to the snapshots is minimized. 
+Therefore, the POD approach is used here for constructing the basis.
+
+In the equation \eqref{Chapter2:problem_pod} the linear part is already reduced in dimension, 
+because the pre-computation of $\hat{A}= V^TAV \in \mathbb{R}^{k \times k}$ supplies a system of dimension $k \ll n$.
+But the evaluation of the nonlinear function $q(y(t))$ is still in the dimension of $n$, i. e.
+\begin{equation}\label{Chapter2:problem_pod_dim}
+  \frac{d}{dt}\hat{y}(t) = \underbrace{\hat{A}}_{k \times k}\hat{y}(t)+ V^Tq(\underbrace{V\hat{y}(t)}_{n}).
+\end{equation}
+To reduce the nonlinear part as well, the DEIM will be used. It provides an approximation $\hat{q}(y(t))$
+of the nonlinear function by approximating the function $q(y(t))$ in an low dimensional subspace spanned by another basis $U \in \mathbb{R}^{n \times m}$, which is 
+constructed out of snapshots of the nonlinear function with the 
+POD method.
+With coefficients $c(y(t))$ the approximation is of the form
+\begin{equation}
+ q(y(t)) \approx \hat{q}(y(t)) = Uc(y(t))
+\end{equation}
+and the form of the reduced system is
+\begin{equation}
+  \frac{d}{dt}\hat{y}(t) = \underbrace{\hat{A}}_{k \times k}\hat{y}(t)+ \underbrace{V^TU}_{k \times m} c(V\hat{y}(t)).
+\end{equation}
+The system of \eqref{Chapter2:problem} is now completely reduced in dimension. The linear part is reduced to $k \ll n$ and the nonlinear part to $m \ll n$. 
+
+How the coefficients $c(y(t))$ will be determined, will be explained in Chapter \ref{Chapter2:deim}, along with an explanation of the DEIM-algorithm and an short error analysis.
+How the two basis are constructed using the POD method will be explained in then next chapter.
+
+
+\section{Proper Orthogonal Decomposition (POD)}\label{Chapter2:pod}
+Consider a set of snapshots $S= \{y_1,\dots,y_{n_s}\} \subset \mathbb{R}^n$ and the corresponding matrix $Y= 
+[y_1,\dots,y_{n_s}] \in \mathbb{R}^{n \times n_s}$. The POD method constructs an orthonormal basis in the space spanned by $S$.
+Let $r = rank\{Y\}$, then there exist $\{v_i\}^k_i \subset \mathbb{R}^n$ orthonormal basis vectors, for a $k \leq r$.
+
+\begin{mydef} \textbf{(SVD):}
+Let $\mathbb{A} \in \mathbb{R}^{m \times n}$ a matrix, then there exist two orthogonal matrices  
+\begin{equation*}
+ U=[\varphi_1 | \dots | \varphi_n] \in \mathbb{R}^{m \times m}, \qquad Z=[\varPsi_1|\dots|\varPsi_m] \in \mathbb{R}^{n \times n}
+\end{equation*}
+such that
+\begin{equation}
+ \mathbb{A} = U\Sigma Z^T, \; mit \; \Sigma = diag(\sigma_1,\dots,\sigma_r) \in \mathbb{R}^{m \times n}
+\end{equation}
+and $\sigma_1 \geq \dots \geq \sigma_r > 0$, for r = min(m,n), $\mathbb{A}\varPsi_i = \sigma_i \varphi_i$ and $\mathbb{A}^T \varphi_i = \sigma_i \varPsi_i$ with $i=1,\dots,r$.
+\end{mydef}
+
+The SVD of $Y = U\Sigma Z^T $
+with orthogonal matrices $U=[\varphi_1 | \dots | \varphi_n] \in \mathbb{R}^{n \times n}$ and
+$Z=[\varPsi_1|\dots|\varPsi_m] \in \mathbb{R}^{m \times m}$ and the diagonal matrix 
+$\Sigma = diag(\sigma_1, \dots ,\sigma_r)$ with singular values $\sigma_1 \geq \dots \geq \sigma_r$
+provides these  basis vectors. Note that the diagonal matrix $\Sigma$ is not square, thus, $diag(\sigma_1,\dots,\sigma_r)$ provides 
+a rectangular matrix with entries $a_{ij} = \sigma_i$ for $i=j$ and $a_{ij} = 0$ for $i \neq j$. 
+
+For a $k \leq m$ the POD-basis is defined as the set of the first $k$ left singular vectors $\varphi_1,\dots,\varphi_k$
+of $U$. Let $V = [\varphi_1,\dots,\varphi_k] \in \mathbb{R}^{n \times k}$ be the matrix of these POD-basis vectors.
+An approximation of a snapshot $y_j$ in the span of $Y$ is therefore $Vc$
+with coefficients $c \in \mathbb{R}^k$. The Galerkin orthogonality of the residual $y_j - Vc$ 
+to the span of $V$ gives $V^T(y_j - Vc) = 0$, hence $y_j \approx VV^Ty_j$. 
+The POD-basis provides a optimal orthogonal basis with regard to 
+the sum of the quadratic error of the approximation of the snapshots.
+
+\newpage
+
+\subsection{Error Bound for POD}
+\begin{mytheo} \textbf{(POD-error bound, \cite[p.~125]{ROM_book2}):}
+
+Let $\mathbb{V}_k = \{ W \in \mathbb{R}^{n \times k} : W^TW = I_k\} $ be the set of all k-dimensional orthonormal bases 
+and $V \in \mathbb{R}^{n \times k}$  the matrix of basis vectors provided by the POD-method related to 
+the snapshots $Y = \{y_1,\dots,y_m\}$, then the following holds
+\begin{equation}\label{ch2:error_bound_pod}
+ \sum_{j=1}^m\parallel y_j - VV^Ty_j\parallel_2^2 =\min_{W \in \mathbb{V}_k} 
+ \sum_{j=1}^m\parallel y_j - WW^Ty_j\parallel_2^2 = \sum_{i=k+1}^r \sigma^2_i.
+\end{equation}
+\end{mytheo}
+
+\begin{mytheo}
+  \textbf{(Schmidt-Eckart-Young, \cite[p.~118]{ROM_book2}):}
+Let $A \in \mathbb{R}^{m \times n}$ be a matrix of rank $p$, then there exist two orthogonal matrices 
+$U=[\varphi_1 | \dots | \varphi_n] \in \mathbb{R}^{n \times n}$ and
+$Z=[\varPsi_1|\dots|\varPsi_m] \in \mathbb{R}^{m \times m}$, so that $A = U\Sigma Z^T$ with the diagonal-matrix 
+$\Sigma = diag(\sigma_1,\dots,\sigma_r)$ and
+the singular values $\sigma_1 \geq \dots \geq \sigma_r \geq 0$ for r=min(m,n).
+The matrix
+\begin{equation}
+ A_k = \sum_{i=1}^k {\sigma_i \varphi_i \varPsi_i^T}, \qquad 0 \leq k \leq p
+\end{equation}
+satisfies the property
+\begin{equation}\label{sey}
+ \| A-A_k\|_F = \min_{\substack{B\in \mathbb{R}^{m \times n} \\ rank(B) \leq k}} \| A-B\|_F = \sqrt{\sum_{i=k+1}^p \sigma_i^2}.
+\end{equation}
+\end{mytheo}
+
+\textbf{Proof of Theorem 1, \cite[p.~125]{ROM_book2}:}
+By Theorem 2, the best rank $k$ approximation of $Y$ is given by
+\begin{equation*}
+ Y_k = \sum_{i=1}^k {\sigma_i \varphi_i \varPsi_i^T}.
+ \end{equation*}
+With $\varPsi_i = \frac{1}{\sigma_i}Y^T\varphi_i$, which results from the definition of the SVD, follows
+\begin{equation*}
+ Y_k = \sum_{i=1}^k {\sigma_i \varphi_i (\frac{1}{\sigma_i}Y^T\varphi_i)^T} 
+ = \sum_{i=1}^k { \varphi_i \varphi_i^T Y} =VV^TY.
+\end{equation*}
+Moreover, for a $W \in \mathbb{V}_k$
+\begin{equation*}
+ \sum_{j=1}^m\parallel y_j - WW^Ty_j\parallel_2^2 
+ = \parallel Y- WW^TY \parallel_F^2,
+\end{equation*}
+because of the definition of the Frobenius norm.
+And with (\ref{sey}) it is
+\begin{equation*}
+ \| Y-Y_k\|_F^2 = \min_{\substack{B\in \mathbb{R}^{m \times n} \\ rank(B) \leq k}} \| Y-B\|_F^2 
+ \leq \min_{W \in \mathbb{V}_k} \parallel Y - WW^TY\parallel_F^2.
+\end{equation*}
+As $Y_k = VV^TY$ follows
+\begin{equation*}
+\parallel Y - VV^TY\parallel_F^2 =
+\min_{W \in \mathbb{V}_k} \parallel Y - WW^TY\parallel_F^2 = \sum_{i=k+1}^r \sigma^2_i.
+\end{equation*}
+
+For the quality of the approximation of the POD reduced model
+the choice of the dimension $k$ of th POD basis is importent. There exist no theoretical bound
+for the approximation error depending on $k$.
+According to \cite{ROM_book2} in practice the ratio of the first $k$ singular values to all singular values, i.e
+\begin{equation}
+ I(k) =\frac{ \sum_{i=1}^k \sigma^2_i}{\sum_{i=1}^r \sigma^2_i}
+\end{equation}
+is used as an error condition for selcting a dimension $k$  heuristically.
+For a given approximation error $\epsilon_{POD}$ 
+\begin{equation}\label{Chapter2:eq:error_funcion_pod}
+  I(k) = \frac{ \sum_{i=1}^k \sigma^2_i}{\sum_{i=1}^r \sigma^2_i} \leq 1- \epsilon_{POD}^2
+\end{equation}
+can be used to determine $k$. 
+
+\section{Discrete Empirical Interpolation Method (DEIM)}
+\label{Chapter2:deim}
+In order to reduce the nonlinear part in \eqref{Chapter2:problem_pod_dim}, a low-dimensional approximation
+of a nonlinear function $q(t): \mathbb{D} \longmapsto \mathbb{R}^n$ is needed, i.e.
+\begin{equation}\label{Chapter2:deim_approx}
+ q(t) \approx Uc(t),
+\end{equation}
+where $c(t) \in \mathbb{R}^m$ is the corresponding coefficient vector and $U \in \mathbb{R}^{n \times m}$ is
+a matrix obtain from the application of the POD approach only on the nonlinear terms. Indeed, it is received from an SVD of a snapshots
+matrix of the nonlinearity.
+To determine the vector $c(t)$ $m$ distinguished rows are selected from the over-determined system 
+$q(t) = Uc(t)$. The selection of the rows can be done with a matrix 
+\begin{equation}
+ P = [e_{p1},\dots,e_{pm}] \in \mathbb{R}^{n \times m},
+\end{equation}
+where $e_{pi} = [0,\dots0,1,0,\dots,0]^T \in \mathbb{R}^n$ is the $pi$-th unit vector, for $i= 1,\dots,m$.
+By multiplying $P^T$ on $q(t) = Uc(t)$ $m$ rows are selected. If $P^TU$ is non-singular,
+the vector $c(t)$ can be determined from
+\begin{equation}
+ c(t) = (P^TU)^{-1}P^Tq(t)
+\end{equation}
+and the approximation \eqref{Chapter2:deim_approx} becomes
+\begin{equation}
+  q(t) \approx Uc(t) = U(P^TU)^{-1}P^Tq(t)
+\end{equation}
+The DEIM thus requires to construct a projection basis $U$ and interpolation indices $\{ p_1,\dots,p_m\}$ used for $P$.
+The projection basis $U$ is constructed by using the POD on a nonlinear set of snapshots 
+$Y_{q} = [q(t_1),\dots,q(t_m)]$ obtained from the 
+high order system. These snapshots are the evaluations of the nonlinear function $q(t)$ on $t_1,\dots,t_{n_s}$.
+They can be obtained together with the snapshots for the full-system POD, because they are already computed there.
+Thus only the SVD has to be computed to obtain $U$.
+
+The interpolation indices are iteratively selected by the greedy algorithm from the 
+basis $U$ (cf. Algorithm \ref{Chapter2:deim_algorithm}). The algorithm selects iteratively $m$ indices $\{ p_1,\dots,p_m\}$, 
+where $p_i \in \{1,\dots,n\}$ for $i = 1,\dots,m$. This minimizes the interpolation error over the
+snapshot set measured in the maximum norm. It starts by selecting the index of the biggest 
+entry of the first column of $U$ and thus the first basis vector, which corresponds to the 
+most dominant singular value of the SVD. Further indices are selected in the way that they correlate to the 
+index of the larges entry of the residual $r= u_i - Uc$. The residual $r$ is the error between the basis
+vector $u_i$ and its projected approximation $Uc$. Since the columns of $U$ are linear independent, $r$ is
+a nonzero vector in each step. Thus, an entry with the larges magnitude can always be selected.
+
+\begin{algorithm}
+\caption{DEIM , \cite{Chaturantabut2010Deim}}\label{Chapter2:deim_algorithm}
+\begin{algorithmic}[1]
+   \item \textbf{Input:}{$\{u_i\}_{i=1}^m \subset \mathbb{R}^n$ }
+   \item \textbf{Output:}{$\vec{\varrho} = \{\varrho_1,\dots,\varrho_m\}^T \in \mathbb{N}^m$}
+   \State $ \varrho_1 = argmax\{|u_1|\}$
+   \State $U = [u_1], P = [e_{\varrho_1}], \vec{\varrho} = [\varrho_1]$
+   \For{$i=2 $ to $m$}
+      \State \textbf{Solve}   $(P^TU)c= P^Tu_i$ 
+      \State $r = u_i - Uc$
+      \State $\varrho_i = argmax\{|r|\}$
+      \State $U \gets [U | u_i], P \gets [P | e_{\varrho_i}], \vec{\varrho} \gets \left[\begin{array}{r}\varrho\\ \varrho_i \end{array}\right] $
+   \EndFor
+\end{algorithmic}
+\end{algorithm}
+
+\newpage
+In line 6 of Algorithm \ref{Chapter2:deim_algorithm} the linear system 
+$(P^TU)c= P^Tu_i$ must be solved. This is only possible if $P^TU$ is always non-singular, as is shown in \cite{Chaturantabut2010Deim}.
+The whole procedure has a complexity  of $O(m^4+mn)$ (cf. \cite[Chapter 2.2.6]{Chaturantabut2010Deim}), where the dimension $m$ of the basis $U$ is
+small.
+
+Formally the DEIM approximation is defined in \cite{Chaturantabut2010Deim} as follows.
+\begin{mydef}
+ Let $f:D \longmapsto \mathbb{R}^n$ be a nonlinear vector valued function with $D \subset \mathbb{R}^d$ for a $d \in \mathbb{N}$.
+ Let $\{u_l\}_{l=1}^m \subset \mathbb{R}^n$ be a set of linear independent vectors.
+ For an $x \in D$ the DEIM approximation of order $m$ in the space spanned by $\{u_l\}_{l=1}^m$ is given by:
+ \begin{equation}\label{deim_app}
+  \hat{f}(x) := U(P^TU)^{-1}P^Tf(x)
+ \end{equation}
+ where $ U = [u_1 | \dots | u_m] \in \mathbb{R}^{n \times m}$ is the basis, provided by the POD method. Moreover $P = [e_{p_1} | \dots | e_{p_m}] \in \mathbb{R}^{n \times m}$,
+ where $\{p_1,\dots,p_m\}$ is the output of the DEIM algorithm with $\{u_l\}_{l=1}^m$ as input vectors.
+\end{mydef}
+It can be shown that $\hat{f}(x)$ is a interpolation of the original $f(x)$. It holds
+\begin{equation*}
+ P^T\hat{f}(x)= P^T(U(P^TU)^{-1}P^Tf(x)) = (P^TU) (P^TU)^{-1}P^Tf(x)=P^Tf(x).
+\end{equation*}
+The functions $\hat{f}(x)$ and $f(x)$ are exactly the same at the DEIM points $\{p_1,\dots,p_m\}$.
+
+
+\subsection{Error Bound for DEIM}
+\begin{mytheo}\textbf{(DEIM-error),\cite{Chaturantabut2010Deim}:}
+Let $f \in \mathbb{R}^n$ be a vector, let $\{u_l\}_{l=1}^m \subset \mathbb{R}^n$ be a set of linear 
+independent orthogonal vectors.
+The DEIM approximation of order $m \leq n$ of $f$ in the space spanned by $\{u_l\}_{l=1}^m$ is 
+$\hat{f} = \mathbb{P}f$, where $\mathbb{P} = U(P^TU)^{-1}P^T$, $ U = [u_1 | \dots | u_m] \in \mathbb{R}^{n \times m}$ and $P = [e_{p_1} | \dots | e_{p_m}] \in \mathbb{R}^{n \times m}$,
+ with $\{p_1,\dots,p_m\}$ being the output of the DEIM-algorithm with input $\{u_l\}_{l=1}^m$. Then the following holds
+ \begin{equation}
+  \parallel f-\hat{f} \parallel_2 \leq C_m \varepsilon(f),
+ \end{equation}
+where $C_m = \parallel (P^TU)^{-1}\parallel_2$ and $\varepsilon(f) = \parallel f - UU^Tf \parallel_2$. 
+\end{mytheo}
+
+\textbf{Proof of Theorem 3, \cite{Chaturantabut2010Deim}:}
+Let $\hat{f}(x)$ be the DEIM approximation. To find an error bound in the 2-norm for
+ $\parallel f-\hat{f} \parallel_2$ look at the best approximation of $f$ in the space spanned by $U$,
+ in particular $f_* = UU^Tf$. Then it holds
+\begin{equation}
+ f = (f- f_*) +f_* = w +f_* \qquad \text{with} \qquad w= f-f_*=f-UU^Tf
+\end{equation}
+and also
+\begin{equation}
+ \hat{f} = \mathbb{P}f = \mathbb{P}(w +f_*) =  \mathbb{P}w + f_*,
+\end{equation}
+because $\mathbb{P} f_* = f_*$.
+Therefore
+\begin{equation}\label{Chapter2:eq:deim_error}
+ \parallel f- \hat{f} \parallel_2 = \parallel w +f_* - (\mathbb{P}w + f_*) \parallel_2 \leq \parallel I - \mathbb{P}\parallel_2 \parallel w \parallel_2
+\end{equation}
+
+with $\parallel I - \mathbb{P}\parallel_2 = \parallel  \mathbb{P}\parallel_2$ as shown in
+\cite{Szyld2006Norm} for any projector-matrix $P \neq 0$. From \ref{Chapter2:eq:deim_error} follows
+
+\begin{equation}
+ \parallel f- \hat{f} \parallel_2 \leq \parallel I - \mathbb{P}\parallel_2 \parallel w \parallel_2 = \parallel  \mathbb{P}\parallel_2 \parallel w \parallel_2
+\end{equation}
+and with $ \parallel \mathbb{P} \parallel_2= \parallel U(P^TU)^{-1}P^T  \parallel_2 = \parallel (P^TU)^{-1}  \parallel_2$.
+Because $U$ and $\mathbb{P}$ are both orthogonal it holds
+\begin{equation}
+ \parallel f- \hat{f} \parallel_2 \leq \parallel (P^TU)^{-1}  \parallel_2 \parallel w \parallel_2
+\end{equation}
+
+Overall it holds 
+\begin{equation}
+ \parallel f- \hat{f} \parallel_2 \leq \parallel \mathbb{P} \parallel_2 \parallel w \parallel_2  =\parallel (P^TU)^{-1} \parallel_2  \parallel f-UU^Tf \parallel_2 =C_m \varepsilon(f).
+\end{equation}
+
+The factor $(P^TU)^{-1}$ depends on the matrix $P$, which is constructed out of the DEIM indices 
+$\{p_1,\dots,p_m\}$. That is the reason the DEIM algorithm aims to select an index that limits the 
+growth of $\parallel (P^TU)^{-1} \parallel_2$ and thus the error of $\parallel f- \hat{f} \parallel_2$.
+Chaturantabut shows in \cite{Chaturantabut2010Deim} a recursive formula for $(P^TU)^{-1}$. This proofs the minimization 
+of this error and also the non-singularity of $(P^TU)^{-1}$, which is needed in the Algorithm \ref{Chapter2:deim_algorithm}.
+Moreover, it can be shown that $C_m$ can be bound with 
+\begin{equation}
+ C_m \leq \frac{(1 + \sqrt{2n})^{m-1}}{\parallel u_1 \parallel_\infty}.
+\end{equation} 
+This bound is very pessimistic and it will grow more rapidly than the actual matrix $\parallel (P^TU)^{-1} \parallel_2$. In \cite{Chaturantabut2010Deim} it is advised to use the matrix norm as a posteriori error estimation, than the priori estimation
+$C_m$, because the matrix $(P^TU)^{-1}$ is usually small. 
+
+The term $\varepsilon(f) = \parallel f - UU^Tf \parallel_2$ depends on $f$. It changes for ever new $f$, hence 
+it is expensive to compute. It is desirable to have an easily computable estimation.
+In \cite{Chaturantabut2010Deim}, the approximation $\varepsilon(f)\approx \sigma_{m+1}$ is used, thus the singular value corresponding to the first left singular vector that has not been taken into the DEIM base matrix $U$.
+This estimate is purely heuristic and is not proved in general, but for the numerical examples in \cite{Chaturantabut2010Deim} it does seem to provide a reasonable qualitative estimate of the
+expected error. The DEIM error should be bound like this, if the trajectories are attracted to a low-dimensional subspace, this means they lie nearly in the space spanned by the snapshots.
+In this work the error bound approximation 
+\begin{equation}\label{ch2:error_bound_deim}
+  \bar{\mathcal{E}_*} = \parallel f-\hat{f} \parallel_2 \leq C_m \varepsilon(f) \lessapprox \parallel (P^TU)^{-1} \parallel_2 \sigma_{m+1}
+\end{equation}
+ will be used for the numerical experiments. 
+
+
+
+\section{Overview of POD-DEIM approach}
+\label{overview}
+
+To recall what the POD-DEIM approach requires to reduce a system like \eqref{problem:ODE} and how the workflow will be, look at Figure \ref{Chapter2:workflowdeim}. To see an overview over the complexity of the different parts look at Table \ref{Chapter2:tablecomplex}.
+The generation of linear and nonlinear snapshots can usually be done in one model evaluation. The computation of the SVD for a large matrix is quite costly. Thus if the number of snapshots $n_s$ grows, it is more efficient to compute
+a thin SVD and the singular vectors and the singular values iteratively and parallel with for example with ARPACK \cite{arpack} or SLEPc \cite{slepc-toms}. 
+The computational work in Table \ref{Chapter2:tablecomplex} has only to be done once, to get the reduced system. The matrices $\hat{A}$ and  $\mathbb{P}$ are precomputed and stored and reused 
+when solving the reduced system. 
+\begin{figure}[H]
+\begin{center}
+
+
+
+
+
+\begin{tikzpicture}[node distance = 3cm, auto]
+    % Place nodes
+    \node [block] (init) {Generation of full system $S=\{ y_1,\dots,y_{ns}\}$ and nonlinear $S_q =\{ q_1,\dots,q_{ns}\}$ snapshots};
+    \node [block, right of=init ,node distance=5cm] (svd) {Compute SVD for $S$ and $S_q$};
+    \node [block, right of=svd,node distance=5cm] (identify) {Construction of Bases $V \in \mathbb{R}^{n \times k}$ and $U \in \mathbb{R}^{n \times m}$ with POD};
+    \node [block, below of=identify, node distance=4cm] (evaluate) {Computation of $m$ DEIM indices with Algorithm \ref{Chapter2:deim_algorithm}};
+    \node [block, left of=evaluate, node distance=5cm] (update) {Precompute: \\$\hat{A} = V^TAV$\\  $\mathbb{P}=V^TU(P^TU)^{-1}$};
+    \node [blocklong, below of=svd, node distance=8cm] (stop) {Solve the reduced system: \\$\hat{y}(0) = V^T y_0 $\\ $
+  \frac{d}{dt}\hat{y}(t) = \underbrace{\hat{A}}_{k \times k}\hat{y}(t)+ \underbrace{\mathbb{P}}_{k \times m} q(P^TV\hat{y}(t))$};
+     \node [block, below of=init, node distance=12cm] (recovering) {Recovering for visualization and post processing: \\ $y = V\hat{y}$ };
+     \node [block, below of=identify, node distance=12cm] (error) {Estimating the approximation error:\\ $\parallel y - V\hat{y}\parallel_2$  };
+    % the labels on the left
+    \begin{scope}[xshift=-3cm,yshift=-2cm]
+        \node[mylabel] (offline)  {\rotatebox{90}{Offline}};
+        \node[mylabel, below of=offline, node distance=8cm] (online) {\rotatebox{90}{Online}};
+    \end{scope}
+    % Draw edges
+    \path [line] (init) -- (svd);
+    \path [line] (svd) -- (identify);
+    \path [line] (identify) -- (evaluate);
+    \path [line,dashed] (update) -- (stop) ;
+    \path [line] (evaluate) -- (update);
+    \path [line] (stop) -- (recovering);
+    \path [line] (stop) -- (error);
+
+\end{tikzpicture}
+\end{center}
+\caption{An overview on the workflow of model reduction.}
+ \label{Chapter2:workflowdeim}
+\end{figure}
+
+
+\begin{table}[H]
+\begin{center}
+
+
+$\begin{array}{|c|c|}
+\hline
+\text{compute Snapshots} & \text{Problem dependent} \\
+  \text{SVD for POD-basis} & \mathcal{O}(nn_s^2) \\
+  \text{DEIM algorithm for m interpolation indices} & \mathcal{O}(m^4+nm) \\
+  \text{Precompute: } \hat{A} = V^TAV & \mathcal{O}(NNZk+nk^2)  \text{ for a sparse A} \\
+  \text{Precompute: } \mathbb{P} = V^TU(P^TU)^{-1} & \mathcal{O}(nkm + m^2n + km^2 + m^3)\\
+\hline
+\end{array}$
+\end{center}
+\caption{Computational Complexity of POD-DEIM}
+ \label{Chapter2:tablecomplex}
+\end{table}
+
+

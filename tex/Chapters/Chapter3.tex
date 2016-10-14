@@ -1,0 +1,165 @@
+
+\chapter{Application of the POD-DEIM approach to a marine ecosystem model} % Main chapter title
+
+\label{Chapter3} % For referencing the chapter elsewhere, use \ref{Chapter1} 
+
+%----------------------------------------------------------------------------------------
+
+\section{Introduction}
+To apply the POD-DEIM approach on a marine ecosystem model, the Simulation Package Metos3D (a Marine Ecosystem Toolkit for Optimization and
+Simulation in 3-D) \cite{metos3dsimpack} is used. This package provides the possibility to simulate the ocean circulation coupled with biogeochemical processes. 
+For the simulation of the ocean circulation the package uses transport matrices as described in \cite{Khatiwala2005}. 
+The matrices are extracted from a general circulation model (GCM) and are capturing the complex three-dimensional
+advective diffusive transport of tracers in a GCM as a sparse matrix. 
+The so called transport matrix method (TMM), demonstrated in \cite{TMM}, makes use of these pre-computed transport data to apply it on arbitrary variables. 
+Monthly averaged diffusion and advection matrices, which are interpolated during computation, are used as a compromise between storage and accuracy.
+The effects, that are in longitudinal and latitudinal directions, are treated explicitly while the vertical effects are computed implicitly. 
+Thus, there are twelve explicit and twelve implicit matrices.  
+
+In addition to this linear part, the package provides an interface for different 
+biogeochemical models that vary in the number of tracers and types of modeled processes.
+They are controlled by a set of parameters $u$ and describe processes like nutrient consumption as well as growing, dying and sinking of different tracer elements.
+For example, the N-Model, that is used in Chapter \ref{Chapter4}, calculates the uptake of inorganic nutrients by phytoplankton of an implicit pyhtoplankton concentration in the euphotic zone (cf. \cite{biomodels}). 
+This uptake is limited by the amount available inorganic 
+nutrients and by the light. The model uses phosphate ($PO_4$) as tracer element which governs the rate of growth of pyhtoplankton.  
+
+
+The surface grid has a resolution of $2.8125 ^{\circ}$ in both directions, longitudinal and latitudinal. This results into a $128 \times 64$ 
+grid with 4448 horizontal points in the oceans, if the grid points, where only land is, are left out. Each grid point represents a water column, called profile. Each profile has at most 15 vertical depth layers.
+Overall, there are $ n_h = 52749 $ grid points, which are held in 
+one single vector for each tracer. The implicit and explicit matrices are extremely sparse as they have only 672k (0,024\%) and 5407k (0,19\%) non zero values. To solve a system with more than one tracer, the matrices and tracers 
+are arranged in a block diagonal system. Thus, with each tracer the linear system grows.
+
+The temporal resolution is $\Delta t = 1/2880$. Assuming a year with 360 days, $\Delta t$ represent a step of three hours. The boundary data is used to have the ice cover and latitude information for each profile and a domain data set
+provides the model with the information of the depths and heights of the vertical layers of each profile. 
+
+The packed provides two solver for periodic steady-states one is a fixed point iteration (spin-up) and the other a Newton solver. In this thesis only the spin-up solver is used.
+
+
+\section{Reduce the System}
+As said, the full discrete representation of the iteration for n tracers is a block diagonal system. An iteration
+reads
+\begin{equation}\label{metos_equ}
+y_{j+1} = A_{impj} (A_{expj} y_j + \Delta t q_j(y_j,u,b_j,d_j)),
+\end{equation}
+where $y_j = (y_i(t_j))^n_{i=1}$ is a vector combined of all n tracer vectors and $t_j = t_0 + (j-1)* \Delta t$ is a point in time.
+$A_{impj}$ and $ A_{expj}$ are the
+block diagonal matrices, interpolated for the time index $j$. The discrete boundary and domain data is represented by
+$b_j = (b_i(t_j))^{n_b}_{i=1}$ and $d_j = (d_i(t_j))^{n_d}_{i=1}$. The biogeochemical model $q_j$ is described by
+$q_j(y_j,u,b_j,d_j) = (q_i(t_j,y_i,u,b_i,d_i))^n_{i=1}$.
+
+To apply the POD-DEIM approach, let $n=1$, so that there is only one tracer and let $n_h$ be the length of the tracer vector. The basis matrices $V \in \mathbb{R}^{n_h \times k}$
+and $U \in \mathbb{R}^{n_h \times m}$ are computed with the POD method. The projector $\mathbb{P} = U(P^TU)^{-1}P^T$ is computed
+with the result $P \in \mathbb{R}^{n_h \times m}$ of the DEIM-Algorithm with input $U$.
+
+After projecting the system \eqref{metos_equ} onto $V$ and applying the DEIM approximation onto the nonlinear part, it
+reads
+\begin{equation}\label{metos_equ_projected}
+ \hat{y}_{j+1} = V^TA_{impj} (A_{expj}V \hat{y}_j + \Delta t    \mathbb{P} q_j(V \hat{y}_j,u,b_j,d_j)),
+\end{equation}
+where $\hat{y}_j = V^T y_j$.
+
+To use the advantage of the reduction, $V^TA_{impj}$ is multiplied out and the system looks like this:
+\begin{equation}\label{metos_red}
+\begin{aligned}
+ \hat{y}_{j+1} &= \underbrace{V^TA_{impj} A_{expj}V}_{A_{rj} \in \mathbb{R}^{k \times k}} 
+ \hat{y}_j + \Delta t  \underbrace{V^TA_{impj} U(P^TU)^{-1}}_{\mathbb{P}_rj \in \mathbb{R}^{k \times m}} P^T q_j(V \hat{y}_j,u,b_j,d_j)
+  \\ &= A_{rj} \hat{y}_j + \Delta t    \mathbb{P}_{rj} P^T q_j(V \hat{y}_j,u,b_j,d_j).
+ \end{aligned}
+\end{equation}
+ 
+The matrices $A_{rj}$ and $\mathbb{P}_{rj}$ are interpolated out of the twelve monthly average matrices $A_{ri}$ and $\mathbb{P}_{ri}$ for $i = 1,...,12$.
+$A_{ri}$ and $\mathbb{P}_{ri}$ are precomputed out of monthly averaged matrices $A_{impi}$ and $A_{expi}$ of the original system,
+the POD-basis $V$ as well as $U$ and the DEIM index matrix $P$. Thus, $A_{ri} = V^T A_{impi} A_{expi} V$ and
+$\mathbb{P}_{ri} = V^T A_{impi} U(P^TU)^{-1}$. They are dense, but quite small, because $k<<n_h$ and $m<<n_h$.
+
+\subsection{Reduction of the nonlinear part}
+The reduction of the nonlinear part is more complex. The best reduction would be possible if the nonlinear function could be evaluated componentwise. Then, only 
+the selected points have to be computed and the reduction would be from $n_h$ to $m$ evaluations.
+But in Metos3D the biogeochemical model is evaluated independently for each profile.
+
+
+Thus, to compute one point a whole profile has to be evaluated. The profiles that have to be evaluated can be calculated with 
+the help of the DEIM-indices and the land-sea mask which contains the geometry information.
+From all the $p=4448$ profiles of the full-order model (FOM), only $m$ are computed. Thus, the dimension reduction is less
+than the reduction of the linear part but one evaluation of the biogeochemical model can be very expensive.  
+ 
+The following pseudo code describes the reduced evaluation of the nonlinear function.
+\begin{algorithm}
+\caption{Pseudo code for the reduction of a biogeochemical model}\label{Chapter3:deim_algorithm}
+\begin{algorithmic}[1]
+   \item \textbf{Input: }{$\vec{\varrho} = \{\varrho_1,..,\varrho_m\}^T \in \mathbb{N}^m$}
+   \item \textbf{Output: }{$\hat{q} \in \mathbb{R}^m$} 
+   \For{$i=0 $ to $m$}
+      \State $index = \textbf{range of profile in tracer vector for DEIM-point } \varrho[i]$ 
+      \State $y_p = V[index,:] \hat{y}$ 
+      \State $b_p,d_p$ = \textbf{select corresponding boundary and domain conditions}
+      \State $q_p = q(y_p,u,b_p,d_p)$
+      \State $\hat{q}[i] = q_p[\varrho [i]]$ 
+    \EndFor
+\end{algorithmic}
+\end{algorithm}
+
+This algorithm uses the DEIM-indices as input and provides an evaluation of the biogeochemical model at the desired points.
+In line 4 the range of the profile for a specific DEIM-point is determined, and then, this part of the high dimensional tracer
+is computed, through projection with the POD-basis $V$. After selecting the corresponding boundary and domain conditions
+the biogeochemical model function is evaluated for this profile. In line 8, the desired point in the profile is
+saved and the rest of the vector is discarded. 
+
+
+Overall, for one time step of the reduced model, the steps that are described by Algorithm \ref{Chapter3:reduced_algorithm} have to be done.
+\begin{algorithm}
+\caption{pseudo code for time step of reduced model}\label{Chapter3:reduced_algorithm}
+\begin{algorithmic}[1]
+  \item \textbf{Input: } {$\textbf{point in time } t \in [0,1)$, $\hat{y}_j \in \mathbb{R}^k$}
+ \item \textbf{Output: } {$\hat{y}_{j+1} \in \mathbb{R}^k $}
+ \State \textbf{compute $\hat{q}$ with Algorithm \ref{Chapter3:deim_algorithm}}
+ \State $\textbf{ interpolate } A_{ri} \textbf{ and } \mathbb{P}_{ri} \textbf{ in point } t$
+ \State $\hat{y}_{j+1} = A_{ri}\hat{y}_j + \mathbb{P}_{ri} \hat{q}$ 
+\end{algorithmic}
+\end{algorithm}
+
+For one time step, the desired parts of the biogeochemical model have to be evaluated, and then, two matrix
+vector multiplications have to be done. 
+
+
+\section{Implementation}
+The code to generate the reduced-order models was mainly written in python using scipy and numpy \cite{scipy}. The DEIM Algorithm and the precomputing of the system matrices were implemented
+with numpy. To exchange data with the PETSc library, used by Metos3D, IO routines for PETSc files were created in python. 
+
+To compute the SVD of the snapshot matrices, at first, numpy was used. 
+As the matrices have become quite large during the progress of this thesis, and the SVD algorithm in numpy was not suitable
+for matrices of this size, the library SLEPc \cite{slepc-toms} was used.
+This provides the possibility to compute partial SVDs in parallel. The algorithms SLEPc uses are explained in \cite{svd_parallel}, where a performance analysis is given as well. 
+
+The reduced model was implemented in python. The biogeochemical models used in Metos3D were included directly with F2PY (Fortran to Python interface generator).
+
+The whole code is freely accessibly via
+\begin{equation*}
+ \text{\url{https://github.com/neeljp/MasterThesis_POD-DEIM}}
+\end{equation*}
+and can be used for further improvements or demonstration.
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
